@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import WeightPage from "./pages/Weight";
@@ -24,34 +25,36 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Auth Routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          
-          {/* App Routes */}
-          <Route path="/" element={<Index />} />
-          <Route path="/weight" element={<WeightPage />} />
-          <Route path="/nutrition" element={<NutritionPage />} />
-          <Route path="/exercises" element={<ExercisesPage />} />
-          <Route path="/goals" element={<GoalsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/appointments" element={<AppointmentsPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          
-          {/* Catch-all Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <ThemeProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* App Routes */}
+            <Route path="/" element={<Index />} />
+            <Route path="/weight" element={<WeightPage />} />
+            <Route path="/nutrition" element={<NutritionPage />} />
+            <Route path="/exercises" element={<ExercisesPage />} />
+            <Route path="/goals" element={<GoalsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/appointments" element={<AppointmentsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            
+            {/* Catch-all Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

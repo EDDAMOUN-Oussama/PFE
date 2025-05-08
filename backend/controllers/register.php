@@ -22,20 +22,17 @@ if (!$data) {
 
 require_once '../config/db.php';
 
-$name = $data['fullName'] ?? '';
 $email = $data['email'] ?? '';
+$name = $data['fullName'] ?? '';
 $password = $data['password'] ?? '';
-
-// بيانات افتراضية
-$goalWeight = 70;
-$currentWeight = 80;
-$height = 170;
-$age = 25;
-$gender = "male";
+$goalWeight =  $data['goalWeight'] ?? '';
+$currentWeight = $data['currentWeight'] ?? '';
+$height = $data['height'] ?? '';
+$age = $data['age'] ?? '';
+$gender = $data['gender'] ?? 'male';
+$activityLevel = $data['activityLevel'] ?? 'sedentary';
 $goalCalories = 2000;
-$activityLevel = "medium";
 
-// تحقق من الإيميل
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
 $stmt->execute();
@@ -48,8 +45,10 @@ if ($stmt->num_rows > 0) {
 $stmt->close();
 
 // أضف المستخدم
+// $stmt = $conn->prepare("INSERT INTO users (name, email, password, goalWeight, currentWeight, height, age, goalCalories, activityLevel) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 $stmt = $conn->prepare("INSERT INTO users (name, email, password, goalWeight, currentWeight, height, age, gender, goalCalories, activityLevel) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sssiiiissi", $name, $email, $password, $goalWeight, $currentWeight, $height, $age, $gender, $goalCalories, $activityLevel);
+$stmt->bind_param("sssiiiisis", $name, $email, $password, $goalWeight, $currentWeight, $height, $age, $gender, $goalCalories, $activityLevel);
+// $stmt->bind_param("sssiiiiii", $name, $email, $password, $goalWeight, $currentWeight, $height, $age, $goalCalories, $activityLevel);
 
 if ($stmt->execute()) {
     echo json_encode(['success' => true, 'message' => 'User registered successfully']);

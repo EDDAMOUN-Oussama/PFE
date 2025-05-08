@@ -1,21 +1,36 @@
-
 import { HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BellRing, Smartphone, Lock, Mail, UserCog, Database, Globe, Sun, Moon, Languages } from 'lucide-react';
+import { BellRing, Smartphone, Lock, Mail, UserCog, Database, Globe } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { useEffect, useState } from 'react';
 
 const SettingsPageContent = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIfMobile = () => setIsMobile(window.innerWidth < 768);
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    return () => window.removeEventListener('resize', checkIfMobile);
+  }, []);
+
   return (
-    <div className="flex-1 ml-64">
-      <div className="container p-6">
-        <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64">
+      <div className="container p-4 md:p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold">Settings</h1>
+          <ThemeToggle />
+        </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-2 space-y-4 md:space-y-6">
+            {/* Notifications Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -63,6 +78,7 @@ const SettingsPageContent = () => {
               </CardContent>
             </Card>
             
+            {/* Account Settings Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -100,6 +116,7 @@ const SettingsPageContent = () => {
               </CardContent>
             </Card>
             
+            {/* Privacy Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -136,36 +153,10 @@ const SettingsPageContent = () => {
             </Card>
           </div>
           
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Sun className="mr-2 h-5 w-5 text-primary" />
-                  Appearance
-                </CardTitle>
-                <CardDescription>Customize the application theme</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Sun className="h-5 w-5" />
-                      <Label htmlFor="theme-mode">Light Mode</Label>
-                    </div>
-                    <Switch id="theme-mode" />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Moon className="h-5 w-5" />
-                      <Label htmlFor="dark-mode">Dark Mode</Label>
-                    </div>
-                    <Switch id="dark-mode" defaultChecked />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="space-y-4 md:space-y-6">
+            <AppearanceSettings />
             
+            {/* Regional Settings Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -196,6 +187,7 @@ const SettingsPageContent = () => {
               </CardContent>
             </Card>
             
+            {/* Connected Devices Card */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
