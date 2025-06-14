@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,15 +8,20 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Eye, EyeOff, CalendarIcon,  ChevronLeft, ChevronRight} from 'lucide-react';
+import { Eye, EyeOff, CalendarIcon } from 'lucide-react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import { format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import { useEffect } from 'react'; 
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 import { 
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from '@/components/ui/select'; 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, { message: 'Name must be at least 2 characters' }),
@@ -25,32 +29,18 @@ const registerSchema = z.object({
   dateOfBirth: z.date({
     required_error: "Date of birth is required",
   }),
-  currentWeight: z.preprocess(
-  (value) => parseFloat(value as string),
-  z.number().min(1).max(500)
-),
-goalWeight: z.preprocess(
-  (value) => parseFloat(value as string),
-  z.number().min(1).max(500)
-),
-height: z.preprocess(
-  (value) => value === '' ? undefined : parseFloat(value as string),
-  z.number({
-    required_error: 'This field is required',
-    invalid_type_error: 'Invalid number',
-  }).min(1).max(500)
-),
-age: z.preprocess(
-  (value) => parseFloat(value as string),
-  z.number().min(0).max(150)
-),
-gender: z.enum(["male", "female"], { required_error: "Gender is required" }),
-activityLevel: z.enum(["sedentary", "light", "active", "veryActive"], { required_error: "Activity level is required" }),
-password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-confirmPassword: z.string(),
+  currentWeight: z.number().int().min(1, { message: 'Current weight is required' }),
+  goalWeight: z.number().int().min(1, { message: 'Goal weight is required' }),
+  height: z.number().int().min(1, { message: 'Height is required' }),
+  gender: z.enum(['male', 'female'], { message: 'Please select your gender' }),
+  activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very active'], { 
+    message: 'Please select your activity level' 
+  }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+  confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-message: "Passwords don't match",
-path: ["confirmPassword"],
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -61,78 +51,81 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationCode, setVerificationCode] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
-  
   const [submittedData, setSubmittedData] = useState<RegisterFormValues | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+  
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
-      email: '',
-      currentWeight: undefined,
-      goalWeight: undefined,
-      height: undefined,
-      age: undefined,
-      gender: 'male',
-      activityLevel: 'sedentary',
+      dateOfBirth: new Date('2000-01-01'),
+      currentWeight: 80,
+      goalWeight: 65,
+      height: 170,
       password: '',
       confirmPassword: '',
     },
   });
-
-  function onSubmit(data: RegisterFormValues) {
-    fetch('http://localhost/pfe/backend/controllers/register.php', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((res) => {
-        if (res.success) {
-          console.log('Registration with:', data);
-          setSubmittedData(data);
-  
-          // Simulate sending verification code to email
-          const randomCode = Math.floor(100000 + Math.random() * 900000).toString();
-          console.log('Verification code:', randomCode); // In a real app, this would be sent to the email
-  
-          toast.success(`Verification code sent to ${data.email}`, {
-            description: "Please check your email and enter the code to verify your account."
-          });
-          setIsVerifying(true);
-          // You may want to store the code in state if you want to validate against it
-          setGeneratedCode(randomCode); // Assuming you have a useState for it
-        } else {
-          toast.error(res.message || 'Registration failed');
-        }
-      })
-      .catch((err) => {
-        toast.error('Something went wrong');
-        console.error(err);
+  async function onSubmit(data: RegisterFormValues) {
+    try {
+      const formattedData = {
+        ...data,
+        dateOfBirth: format(data.dateOfBirth, "yyyy-MM-dd"),
+      };
+      const response = await fetch('http://localhost/pfe/backend/controllers/register.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formattedData),
       });
+
+      console.log('Registration result:', formattedData);
+      const result = await response.json();
+      if (result.success) {
+        toast.success(`Verification code sent to ${data.email}`, {
+          description: "Please check your email and enter the code to verify your account.",
+        });
+        setSubmittedData(data);
+        setIsVerifying(true);
+      } else {
+        toast.error(result.message || 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during registration:', error);
+      toast.error('An error occurred. Please try again (1).');
+    }
   }
-  
-  function verifyCode() {
-    // In a real app, we would validate the code against what was sent
-    // For demo purposes, any 6-digit code is accepted
-    if (verificationCode.length === 6) {
-      toast.success('Email verified successfully!');
-      
-      // Complete the registration
-      setTimeout(() => {
-        toast.success('Account created successfully!');
-        navigate('/login');
-      }, 1000);
-    } else {
-      toast.error('Invalid verification code. Please try again.');
+
+  async function verifyCode() {
+    try {
+      const verifyResponse = await fetch('http://localhost/pfe/backend/controllers/verify_code.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: submittedData?.email,
+          code: verificationCode,
+        }),
+      });
+
+      const verifyResult = await verifyResponse.json();
+
+      if (verifyResponse.ok) {
+        toast.success('Email verified successfully!');
+
+        // Complete the registration
+        setTimeout(() => {
+          toast.success('Account created successfully!');
+          navigate('/login');
+        }, 1000);
+      } else {
+        toast.error(verifyResult.message || 'Invalid verification code. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error during verification:', error);
+      toast.error('An error occurred. Please try again. (2)');
     }
   }
 
@@ -205,7 +198,6 @@ export default function Register() {
       </AuthLayout>
     );
   }
-  
 
   return (
     <AuthLayout 
@@ -221,28 +213,28 @@ export default function Register() {
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="KADOUR Omar" {...field} />
+                  <Input placeholder="John Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
-          />  
+          />
+          
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="name@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
+          <FormField
             control={form.control}
             name="dateOfBirth"
             render={({ field }) => (
@@ -328,96 +320,93 @@ export default function Register() {
               </FormItem>
             )}
           />
-          
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
-            control={form.control}
-            name="currentWeight"
-            render={({ field }) => (
+              control={form.control}
+              name="currentWeight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Current Weight (kg)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="70"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value, 10) : '')}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="goalWeight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Goal Weight (kg)</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="65"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value, 10) : '')}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="height"
+              render={({ field }) => (
               <FormItem>
-                <FormLabel>Current Weight</FormLabel>
+                <FormLabel>Height (cm)</FormLabel>
                 <FormControl>
-                  <Input placeholder="80" type="number" {...field} />
+                  <Input
+                    type="number"
+                    placeholder="175"
+                    value={field.value || ''}
+                    onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value, 10) : '')}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
-            )}
-          />
+              )}
+            />
+            </div>
 
           <FormField
             control={form.control}
-            name="goalWeight"
+            name="gender"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>goal Weight</FormLabel>
+                <FormLabel>Gender</FormLabel>
                 <FormControl>
-                  <Input placeholder="70" type="number" {...field} />
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex flex-row space-x-6"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="male" id="male" />
+                      <label htmlFor="male">Male</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="female" id="female" />
+                      <label htmlFor="female">Female</label>
+                    </div>
+                  </RadioGroup>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
-          <FormField
-            control={form.control}
-            name="height"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>height(cm)</FormLabel>
-                <FormControl>
-                  <Input placeholder="170" type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="age"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Age</FormLabel>
-                <FormControl>
-                  <Input placeholder="25" type="number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-          control={form.control}
-          name="gender"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Gender</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  className="flex gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="male" id="gender-male" />
-                    <FormLabel htmlFor="gender-male" className="font-normal">
-                      Male
-                    </FormLabel>
-                  </div>
-          
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="female" id="gender-female" />
-                    <FormLabel htmlFor="gender-female" className="font-normal">
-                      Female
-                    </FormLabel>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-
 
           <FormField
             control={form.control}
@@ -425,22 +414,25 @@ export default function Register() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Activity Level</FormLabel>
-                <FormControl>
-                  <select
-                    {...field}
-                    className="w-full border rounded p-2"
-                  >
-                    <option value="sedentary">Sedentary (little to no exercise)</option>
-                    <option value="light">Lightly active (light exercise/sports 1-3 days/week)</option>
-                    <option value="active">Active (moderate exercise/sports 3-5 days/week)</option>
-                    <option value="veryActive">Very active (hard exercise/sports 6-7 days a week)</option>
-                  </select>
-                </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your activity level" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="sedentary">Sedentary (little or no exercise)</SelectItem>
+                    <SelectItem value="light">Light (light exercise 1-3 days/week)</SelectItem>
+                    <SelectItem value="moderate">Moderate (moderate exercise 3-5 days/week)</SelectItem>
+                    <SelectItem value="active">Active (hard exercise 6-7 days/week)</SelectItem>
+                    <SelectItem value="very active">Very Active (very hard exercise & physical job)</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
+          
           <FormField
             control={form.control}
             name="password"

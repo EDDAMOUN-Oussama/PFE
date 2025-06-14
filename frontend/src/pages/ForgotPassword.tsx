@@ -24,17 +24,38 @@ export default function ForgotPassword() {
       email: '',
     },
   });
+  
+  async function onSubmit(data: ForgotPasswordFormValues) {
+    try {
+      const response = await fetch('http://localhost/pfe/backend/controllers/forgotPassword.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      console.log('Password reset requested for:', data.email);
+      const result = await response.json();
 
-  function onSubmit(data: ForgotPasswordFormValues) {
-    console.log('Password reset requested for:', data.email);
-    // In a real app, this would be an API call to request a password reset
-    
-    // For now, let's simulate a successful request
-    setTimeout(() => {
-      toast.success('Password reset link sent to your email!');
-      navigate('/login');
-    }, 1000);
+      if (response.ok) {
+        toast.success(`Verification code sent to ${data.email}`, {
+          description: "Please check your email and enter the code to verify your account.",
+        });
+        setTimeout(() => {
+          toast.success('Redirecting to reset password page...');
+          localStorage.setItem('email', data.email);
+          navigate('/reset-password');
+        }, 2000);
+      } else {
+        toast.error(result.message || 'Failed to send verification code. Please try again.'); 
+      }
+    } catch (error) {
+      console.error('Error requesting password reset:', error);
+      toast.error('An error occurred while requesting password reset. Please try again later.');
+    }
   }
+
+      
 
   return (
     <AuthLayout 

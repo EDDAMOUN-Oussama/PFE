@@ -12,6 +12,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthLayout from '@/components/auth/AuthLayout';
 
 const resetPasswordSchema = z.object({
+    email: z.string().email({ message: 'Please enter a valid email address' }),
+  code_viryfication: z.string().length(6, { message: 'Le code de vérification doit contenir exactement 6 caractères' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -29,20 +31,40 @@ export default function ResetPassword() {
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
+      email: localStorage.getItem('email') || '',
       password: '',
       confirmPassword: '',
+      code_viryfication: '', 
     },
   });
 
-  function onSubmit(data: ResetPasswordFormValues) {
+  async function onSubmit(data: ResetPasswordFormValues) {
+    try {
+      const response = await fetch('http://localhost/pfe/backend/controllers/resetpass.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
     console.log('Password reset with:', data);
-    // In a real app, this would be an API call to reset the password
-    
-    // For now, let's simulate a successful password reset
-    setTimeout(() => {
-      toast.success('Password reset successfully!');
-      navigate('/login');
-    }, 1000);
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('Password reset successfully!', {
+          description: "You can now log in with your new password.",
+        });
+        setTimeout(() => {
+          localStorage.removeItem('email');
+          navigate('/login');
+        }, 1000);
+      } else {
+        toast.error(result.message || 'Failed to reset password. Please try again.');
+      }
+  } catch (error) { 
+      console.error('Error resetting password:', error);
+      toast.error('An error occurred while resetting your password. Please try again later.');
+    }
   }
 
   return (
@@ -52,6 +74,45 @@ export default function ResetPassword() {
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="code_viryfication"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Code Verification</FormLabel>
+                <FormControl>
+                  <div className="flex space-x-2">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                      <Input
+                        key={index}
+                        type="text"
+                        maxLength={1}
+                        className="w-12 text-center"
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (/^\d$/.test(value) || value === "") {
+                            const newValue = field.value.split("");
+                            newValue[index] = value;
+                            field.onChange(newValue.join(""));
+                            if (value !== "" && index < 5) {
+                              const nextInput = document.querySelector(
+                                `input[data-index="${index + 1}"]`
+                              ) as HTMLInputElement;
+                              nextInput?.focus();
+                            }
+                          }
+                        }}
+                        value={field.value[index] || ""}
+                        data-index={index}
+                      />
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="password"
@@ -83,7 +144,7 @@ export default function ResetPassword() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="confirmPassword"
@@ -122,7 +183,7 @@ export default function ResetPassword() {
 
           <div className="text-center text-sm">
             <p>
-              Remember your password?{' '}
+              Remember your password?{" "}
               <Link to="/login" className="font-medium text-primary hover:text-primary/80">
                 Back to login
               </Link>

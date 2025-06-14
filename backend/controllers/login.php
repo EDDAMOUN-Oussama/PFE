@@ -1,13 +1,10 @@
 <?php
-// header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Origin: http://localhost:8080");
+header("Content-Type: application/json");
+header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Headers: Content-Type");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+require_once '../config/db.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -16,28 +13,47 @@ if (!$data) {
     exit;
 }
 
-require_once '../config/db.php';
+if (!isset($data['email']) || !isset($data['password'])) {
+    echo json_encode(['success' => false, 'message' => 'Email and password are required']);
+    exit;
+}
 
-$email = $data['email'] ?? '';
-$password = $data['password'] ?? '';
+$conn = Database::connect();
 
-// البحث عن المستخدم ومطابقة الإيميل وكلمة المرور كما هي
-$stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ? AND password = ?");
-$stmt->bind_param("ss", $email, $password);
+$email = $data['email'];
+$password = $data['password'];
+if (!$conn) {
+    echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+    exit;
+}
+$stmt = $conn->prepare("SELECT id, name, email, password, is_verified FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows === 1) {
     $user = $result->fetch_assoc();
-    echo json_encode([
-        'success' => true,
-        'message' => 'Login successful',
-        'user' => [
-            'id' => $user['id'],
-            'name' => $user['name'],
-            'email' => $email
-        ]
-    ]);
+
+    if (password_verify($password, $user['password'])) {
+        if ($user['is_verified'] == 1) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $user['id'],
+                    'name' => $user['name'],
+                    'email' => $user['email']
+                ]
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Account not verified']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Incorrect email or password']);
+    }
 } else {
     echo json_encode(['success' => false, 'message' => 'Incorrect email or password']);
 }
+
+$conn->close();
+?>

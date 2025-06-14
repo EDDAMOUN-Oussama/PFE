@@ -13,7 +13,7 @@ import AuthLayout from '@/components/auth/AuthLayout';
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -29,7 +29,6 @@ export default function Login() {
       password: '',
     },
   });
-
   async function onSubmit(data: LoginFormValues) {
     try {
       const res = await fetch('http://localhost/pfe/backend/controllers/login.php', {
@@ -39,22 +38,25 @@ export default function Login() {
         },
         body: JSON.stringify(data),
       });
-  
+
+      if (!res.ok) {
+        throw new Error('Failed to login');
+      }
+
       const result = await res.json();
-  
+
       if (result.success) {
         toast.success('Successfully logged in!');
-        // تخزين بيانات المستخدم مثلاً في localStorage
         localStorage.setItem('user', JSON.stringify(result.user));
-        navigate('/');
+        navigate('/dashboard');
       } else {
         toast.error(result.message || 'Login failed');
       }
-    } catch (err) {
-      toast.error('Server error');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('An error occurred during login');
     }
   }
-  
 
   return (
     <AuthLayout 

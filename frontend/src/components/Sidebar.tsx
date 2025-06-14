@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Activity, BarChart, Utensils, Dumbbell, Target, Calendar, User, Settings, LogOut, ShieldCheck, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Activity, BarChart, Utensils, Dumbbell, Target, Calendar, User, Settings, LogOut, ShieldCheck, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -12,13 +12,14 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/' },
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
     { icon: Activity, label: 'Weight Tracker', path: '/weight' },
     { icon: Utensils, label: 'Nutrition', path: '/nutrition' },
     { icon: Dumbbell, label: 'Exercises', path: '/exercises' },
     { icon: Target, label: 'Goals', path: '/goals' },
     { icon: BarChart, label: 'Reports', path: '/reports' },
     { icon: Calendar, label: 'Appointments', path: '/appointments' },
+    { icon: Bell, label: 'Notifications', path: '/notifications' },
     { icon: User, label: 'Profile', path: '/profile' },
     { icon: Settings, label: 'Settings', path: '/settings' },
     { icon: ShieldCheck, label: 'Admin', path: '/admin' },
