@@ -1,15 +1,50 @@
-
+import { useState } from 'react';
+import { useHealth } from '@/contexts/HealthContext';
 import { HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Dumbbell, Bike, Timer, Activity } from 'lucide-react';
+import { Dumbbell, Bike, Timer, Activity, Plus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import AddExerciseForm from '@/components/exercises/AddExerciseForm';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const ExercisesPageContent = () => {
+  const { exerciseEntries } = useHealth();
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const getIconForType = (type: string) => {
+    switch (type) {
+      case 'cardio':
+        return <Bike className="h-5 w-5 mr-3 text-muted-foreground" />;
+      case 'strength':
+        return <Dumbbell className="h-5 w-5 mr-3 text-muted-foreground" />;
+      case 'flexibility':
+      case 'sports':
+      case 'other':
+      default:
+        return <Activity className="h-5 w-5 mr-3 text-muted-foreground" />;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, "eeee, HH:mm", { locale: fr });
+  };
+
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
-        <h1 className="text-3xl font-bold mb-6">Suivi des Exercices</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Suivi des Exercices</h1>
+          <Button onClick={() => setShowAddForm(!showAddForm)}>
+            <Plus className="mr-2 h-4 w-4" /> 
+            {showAddForm ? "Masquer le formulaire" : "Ajouter un exercice"}
+          </Button>
+        </div>
+        
+        {showAddForm && <AddExerciseForm onFinished={() => setShowAddForm(false)} />}
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
@@ -73,49 +108,32 @@ const ExercisesPageContent = () => {
             <CardTitle>Exercices Récents</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-4">
-                <div className="flex items-center">
-                  <Activity className="h-5 w-5 mr-2 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Course Matinale</p>
-                    <p className="text-sm text-muted-foreground">Aujourd'hui, 7h30</p>
+            {exerciseEntries.length > 0 ? (
+              <div className="space-y-4">
+                {exerciseEntries.slice(0, 5).map((exercise, index) => (
+                  <div key={exercise.id} className={`flex items-center justify-between ${index < exerciseEntries.slice(0, 5).length - 1 ? 'border-b pb-4' : ''}`}>
+                    <div className="flex items-center">
+                      {getIconForType(exercise.type)}
+                      <div>
+                        <p className="font-medium">{exercise.name}</p>
+                        <p className="text-sm text-muted-foreground capitalize">
+                          {formatDate(exercise.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-medium">{exercise.duration} min</p>
+                      <p className="text-sm text-muted-foreground">{exercise.caloriesBurned} cal</p>
+                    </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">30 min</p>
-                  <p className="text-sm text-muted-foreground">320 cal</p>
-                </div>
+                ))}
               </div>
-              
-              <div className="flex items-center justify-between border-b pb-4">
-                <div className="flex items-center">
-                  <Dumbbell className="h-5 w-5 mr-2 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Entraînement de Force</p>
-                    <p className="text-sm text-muted-foreground">Hier, 18h00</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">45 min</p>
-                  <p className="text-sm text-muted-foreground">280 cal</p>
-                </div>
+            ) : (
+              <div className="text-center py-6 text-muted-foreground">
+                <Dumbbell className="h-10 w-10 mx-auto mb-2" />
+                <p>Aucun exercice enregistré pour aujourd'hui.</p>
               </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Bike className="h-5 w-5 mr-2 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Cyclisme</p>
-                    <p className="text-sm text-muted-foreground">Il y a 2 jours, 17h30</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-medium">60 min</p>
-                  <p className="text-sm text-muted-foreground">450 cal</p>
-                </div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>

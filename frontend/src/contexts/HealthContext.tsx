@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define types for health data
@@ -66,6 +65,8 @@ interface HealthContextType {
   dailyStats: DailyStats;
   user: User;
   addWeightEntry: (weightEntry: { weight: number; date: string }) => void;
+  addFoodEntry: (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fat?: number; date: string }) => void;
+  addExerciseEntry: (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string; }) => void;
 }
 
 const HealthContext = createContext<HealthContextType | undefined>(undefined);
@@ -207,10 +208,10 @@ const mockUser: User = {
 
 export function HealthProvider({ children }: { children: React.ReactNode }) {
   const [goals] = useState<Goal[]>(mockGoals);
-  const [exerciseEntries] = useState<ExerciseEntry[]>(mockExerciseEntries);
-  const [foodEntries] = useState<FoodEntry[]>(mockFoodEntries);
+  const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>(mockExerciseEntries);
+  const [foodEntries, setFoodEntries] = useState<FoodEntry[]>(mockFoodEntries);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>(mockWeightEntries);
-  const [dailyStats] = useState<DailyStats>(mockDailyStats);
+  const [dailyStats, setDailyStats] = useState<DailyStats>(mockDailyStats);
   const [user] = useState<User>(mockUser);
 
   const addWeightEntry = (weightEntry: { weight: number; date: string }) => {
@@ -223,8 +224,59 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     console.log(`Weight added: ${weightEntry.weight} kg on ${weightEntry.date}`);
   };
 
+  const addFoodEntry = (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fat?: number; date: string }) => {
+    const newEntry: FoodEntry = {
+      id: Date.now().toString(),
+      name: foodEntry.name,
+      mealType: foodEntry.mealType,
+      calories: foodEntry.calories,
+      protein: foodEntry.protein,
+      carbs: foodEntry.carbs,
+      fat: foodEntry.fat,
+      date: foodEntry.date,
+    };
+    setFoodEntries(prev => [...prev, newEntry]);
+    
+    // Update daily stats
+    setDailyStats(prev => ({
+      ...prev,
+      caloriesConsumed: prev.caloriesConsumed + foodEntry.calories,
+      netCalories: prev.netCalories + foodEntry.calories,
+    }));
+    
+    console.log(`Food added: ${foodEntry.name} - ${foodEntry.calories} kcal`);
+  };
+
+  const addExerciseEntry = (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string; }) => {
+    const newEntry: ExerciseEntry = {
+      id: Date.now().toString(),
+      ...exerciseEntry,
+    };
+    setExerciseEntries(prev => [newEntry, ...prev]);
+
+    // Update daily stats
+    setDailyStats(prev => ({
+      ...prev,
+      caloriesBurned: prev.caloriesBurned + exerciseEntry.caloriesBurned,
+      exerciseMinutes: prev.exerciseMinutes + exerciseEntry.duration,
+      netCalories: prev.netCalories - exerciseEntry.caloriesBurned,
+    }));
+    
+    console.log(`Exercise added: ${exerciseEntry.name} - ${exerciseEntry.duration} min`);
+  };
+
   return (
-    <HealthContext.Provider value={{ goals, exerciseEntries, foodEntries, weightEntries, dailyStats, user, addWeightEntry }}>
+    <HealthContext.Provider value={{ 
+      goals, 
+      exerciseEntries, 
+      foodEntries, 
+      weightEntries, 
+      dailyStats, 
+      user, 
+      addWeightEntry,
+      addFoodEntry,
+      addExerciseEntry
+    }}>
       {children}
     </HealthContext.Provider>
   );
@@ -236,4 +288,4 @@ export const useHealth = () => {
     throw new Error('useHealth must be used within a HealthProvider');
   }
   return context;
-};
+}

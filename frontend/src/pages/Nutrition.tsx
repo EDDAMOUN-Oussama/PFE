@@ -1,11 +1,23 @@
-
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Apple, Coffee, UtensilsCrossed, Plus } from 'lucide-react';
+import AddFoodForm from '@/components/nutrition/AddFoodForm';
 
 const NutritionPageContent = () => {
+  const [showAddForm, setShowAddForm] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check if we should open the form based on navigation state
+    if (location.state?.openForm) {
+      setShowAddForm(true);
+    }
+  }, [location.state]);
+
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
@@ -52,6 +64,10 @@ const NutritionPageContent = () => {
           </Card>
         </div>
         
+        {/* Conditionally show Add Food Form */}
+        {showAddForm && <AddFoodForm />}
+        
+        {/* Food Journal */}
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Journal Alimentaire d'Aujourd'hui</CardTitle>
@@ -60,9 +76,12 @@ const NutritionPageContent = () => {
             <p className="text-muted-foreground mb-4">Suivez vos repas pour surveiller votre apport calorique et nutritionnel.</p>
             <div className="border rounded-md p-6 text-center">
               <p className="mb-4">Utilisez le bouton "Ajouter Aliment" pour commencer à suivre vos repas d'aujourd'hui.</p>
-              <Button className="mt-2">
+              <Button 
+                className="mt-2"
+                onClick={() => setShowAddForm(!showAddForm)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
-                Ajouter Aliment
+                {showAddForm ? 'Masquer le formulaire' : 'Ajouter Aliment'}
               </Button>
             </div>
           </CardContent>

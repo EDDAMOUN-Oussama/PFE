@@ -3,10 +3,16 @@ import { useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { Dumbbell, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const ExerciseLog = () => {
   const { exerciseEntries } = useHealth();
   const { t } = useI18n();
+  const navigate = useNavigate();
+
+  const handleAddExercise = () => {
+    navigate('/exercises', { state: { openForm: true } });
+  };
 
   // Map of exercise types to their icon colors
   const typeColors: Record<string, string> = {
@@ -21,8 +27,8 @@ const ExerciseLog = () => {
     <div className="health-card">
       <div className="health-card-header">
         <h3 className="health-card-title">{t('dashboard.todaysExercise')}</h3>
-        <Button size="sm" variant="outline" className="h-8">
-          <Plus className="h-4 w-4 mr-1" /> {t('dashboard.logExercise')}
+        <Button size="sm" variant="outline" className="h-8" onClick={handleAddExercise}>
+          <Plus className="h-4 w-4 mr-1" /> Ajouter un exercice
         </Button>
       </div>
       
@@ -47,8 +53,8 @@ const ExerciseLog = () => {
           <div className="text-center py-6">
             <Dumbbell className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
             <p className="text-muted-foreground">{t('dashboard.noExercisesToday')}</p>
-            <Button variant="outline" size="sm" className="mt-2">
-              <Plus className="h-4 w-4 mr-1" /> {t('dashboard.addFirstExercise')}
+            <Button variant="outline" size="sm" className="mt-2" onClick={handleAddExercise}>
+              <Plus className="h-4 w-4 mr-1" /> Ajouter un exercice
             </Button>
           </div>
         )}

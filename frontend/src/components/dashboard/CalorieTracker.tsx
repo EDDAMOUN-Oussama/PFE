@@ -4,10 +4,12 @@ import { useI18n } from '@/contexts/I18nContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const CalorieTracker = () => {
   const { foodEntries, dailyStats, user } = useHealth();
   const { t } = useI18n();
+  const navigate = useNavigate();
   
   const goalCalories = user.goalCalories || 2000;
   const remainingCalories = Math.max(0, goalCalories - dailyStats.caloriesConsumed);
@@ -32,11 +34,15 @@ const CalorieTracker = () => {
   
   const macros = getTotalMacros();
 
+  const handleAddFood = () => {
+    navigate('/nutrition', { state: { openForm: true } });
+  };
+
   return (
     <div className="health-card">
       <div className="health-card-header">
         <h3 className="health-card-title">{t('dashboard.todaysNutrition')}</h3>
-        <Button size="sm" variant="outline" className="h-8">
+        <Button size="sm" variant="outline" className="h-8" onClick={handleAddFood}>
           <Plus className="h-4 w-4 mr-1" /> {t('dashboard.addFood')}
         </Button>
       </div>
