@@ -60,7 +60,7 @@ $stmt->close();
 
 $verification_code = rand(100000, 999999);
 
-$stmt = $conn->prepare("UPDATE users SET verification_code = ?, is_verified = 0 WHERE email = ?");
+$stmt = $conn->prepare("UPDATE users SET verification_code = ? WHERE email = ?");
 $stmt->bind_param("is", $verification_code, $email);
 if (!$stmt->execute()) {
     echo json_encode(['success' => false, 'message' => 'Erreur lors de la mise à jour du code de vérification']);

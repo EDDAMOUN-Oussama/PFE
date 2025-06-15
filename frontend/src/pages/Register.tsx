@@ -98,6 +98,34 @@ export default function Register() {
     }
   }
 
+  async function resendVerificationCode() {
+    if (!submittedData?.email) {  
+      toast.error('Aucun email soumis pour renvoyer le code de vérification.');
+      return;
+    }
+    console.log('Renvoyer le code de vérification à:', submittedData.email);
+    try {
+      const resendResponse = await fetch('http://localhost/pfe/backend/controllers/resend_code.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: submittedData.email }),
+      });
+
+      const resendResult = await resendResponse.json();
+      if (resendResult.success) {
+        toast.success(`Code de vérification renvoyé à ${submittedData.email}`);
+      } else {
+        toast.error(resendResult.message || 'Échec de l\'envoi du code de vérification. Veuillez réessayer.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la renvoi du code :', error);
+      toast.error('Une erreur s\'est produite lors de l\'envoi du code. Veuillez réessayer.');
+    }
+  }
+
+
   async function verifyCode() {
     try {
       const verifyResponse = await fetch('http://localhost/pfe/backend/controllers/verify_code.php', {
@@ -113,7 +141,7 @@ export default function Register() {
 
       const verifyResult = await verifyResponse.json();
 
-      if (verifyResponse.ok) {
+      if (verifyResult.success) {
         toast.success('Email vérifié avec succès !');
 
         setTimeout(() => {
@@ -184,9 +212,7 @@ export default function Register() {
           <div className="text-center text-sm">
             <p>
               Vous n'avez pas reçu le code ?{' '}
-              <Button variant="link" className="p-0 h-auto" onClick={() => {
-                toast.success('Code de vérification renvoyé');
-              }}>
+              <Button variant="link" onClick={resendVerificationCode}  className="p-0 h-auto">
                 Renvoyer
               </Button>
             </p>

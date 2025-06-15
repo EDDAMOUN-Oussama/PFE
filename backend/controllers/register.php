@@ -31,7 +31,6 @@ if (!$conn) {
     die(json_encode(['success' => false, 'message' => 'Erreur de connexion à la base de données']));
 }
 
-// التحقق مما إذا كان البريد مسجلًا بالفعل
 $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->bind_param("s", $data['email']);
 $stmt->execute();
