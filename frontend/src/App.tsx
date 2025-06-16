@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +21,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminPage from "./pages/Admin";
 import NotificationsPage from "./pages/Notifications";
+import SpecialistPage from "./pages/Specialist";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +55,7 @@ const App = () => (
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/specialist" element={<SpecialistPage />} />
               
               {/* Catch-all Route */}
               <Route path="*" element={<NotFound />} />

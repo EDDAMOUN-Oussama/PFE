@@ -1,15 +1,27 @@
 
+import { useState } from 'react';
 import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { User, Mail, Calendar, Ruler, Scale, Activity, Cog, Edit2 } from 'lucide-react';
+import { User, Mail, Calendar, Ruler, Scale, Activity, Edit2, Stethoscope, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
+import { EditProfileForm } from '@/components/profile/EditProfileForm';
+import { EditHealthProfileForm } from '@/components/profile/EditHealthProfileForm';
 
 const ProfilePageContent = () => {
   const { user } = useHealth();
   const { t } = useI18n();
+  const [showSpecialistRequest, setShowSpecialistRequest] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [showEditHealthProfile, setShowEditHealthProfile] = useState(false);
+  
+  const handleSpecialistRequest = () => {
+    setShowSpecialistRequest(true);
+    toast.success('Demande de spécialiste envoyée avec succès');
+  };
   
   return (
     <div className="flex-1 ml-64">
@@ -42,9 +54,35 @@ const ProfilePageContent = () => {
                   <span>{t('profile.moderateActivity')}</span>
                 </div>
                 
-                <Button variant="outline" className="w-full mt-4 flex items-center justify-center">
-                  <Edit2 className="h-4 w-4 mr-2" /> {t('profile.editProfile')}
+                <Button 
+                  variant="outline" 
+                  className="w-full mt-4 flex items-center justify-center"
+                  onClick={() => setShowEditProfile(true)}
+                >
+                  <Edit2 className="h-4 w-4 mr-2" /> Modifier le profil
                 </Button>
+                
+                {!showSpecialistRequest && (
+                  <Button 
+                    variant="default" 
+                    className="w-full mt-2 flex items-center justify-center"
+                    onClick={handleSpecialistRequest}
+                  >
+                    <Stethoscope className="h-4 w-4 mr-2" /> 
+                    Devenir Spécialiste
+                  </Button>
+                )}
+                
+                {showSpecialistRequest && (
+                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
+                    <div className="flex items-center">
+                      <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                      <span className="text-sm text-green-800">
+                        Demande de spécialiste en cours de traitement
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -97,17 +135,6 @@ const ProfilePageContent = () => {
                       </div>
                       <span className="text-2xl font-bold">{user.goalCalories} {t('profile.kcal')}</span>
                     </div>
-                    
-                    <div className="bg-muted/30 p-4 rounded-md flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <Cog className="h-5 w-5 mr-2 text-primary" />
-                          <span className="text-sm font-medium">{t('profile.adjustGoals')}</span>
-                        </div>
-                        <span className="text-sm text-muted-foreground">{t('profile.customizeTargets')}</span>
-                      </div>
-                      <Button variant="outline" size="sm">{t('profile.configure')}</Button>
-                    </div>
                   </div>
                 </div>
                 
@@ -119,9 +146,14 @@ const ProfilePageContent = () => {
                     {t('profile.viewHealthHistory')}
                   </Button>
                   
-                  <Button variant="outline" size="sm" className="flex items-center">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="flex items-center"
+                    onClick={() => setShowEditHealthProfile(true)}
+                  >
                     <User className="h-4 w-4 mr-2" />
-                    {t('profile.updateHealthProfile')}
+                    Mettre à jour le profil de santé
                   </Button>
                 </div>
               </div>
@@ -129,38 +161,15 @@ const ProfilePageContent = () => {
           </Card>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('profile.accountSettings')}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
-                <div>
-                  <h3 className="font-medium">{t('profile.notificationPreferences')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('profile.notificationPreferencesDesc')}</p>
-                </div>
-                <Button variant="outline" className="mt-2 md:mt-0">{t('profile.manage')}</Button>
-              </div>
-              
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
-                <div>
-                  <h3 className="font-medium">{t('profile.privacySettings')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('profile.privacySettingsDesc')}</p>
-                </div>
-                <Button variant="outline" className="mt-2 md:mt-0">{t('profile.configure')}</Button>
-              </div>
-              
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="font-medium">{t('profile.connectedDevices')}</h3>
-                  <p className="text-sm text-muted-foreground">{t('profile.connectedDevicesDesc')}</p>
-                </div>
-                <Button variant="outline" className="mt-2 md:mt-0">{t('profile.addDevice')}</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <EditProfileForm 
+          open={showEditProfile} 
+          onOpenChange={setShowEditProfile} 
+        />
+        
+        <EditHealthProfileForm 
+          open={showEditHealthProfile} 
+          onOpenChange={setShowEditHealthProfile} 
+        />
       </div>
     </div>
   );

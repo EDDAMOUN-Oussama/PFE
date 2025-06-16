@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useHealth } from '@/contexts/HealthContext';
 import { HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
@@ -12,7 +13,16 @@ import { fr } from 'date-fns/locale';
 
 const ExercisesPageContent = () => {
   const { exerciseEntries } = useHealth();
+  const location = useLocation();
   const [showAddForm, setShowAddForm] = useState(false);
+
+  useEffect(() => {
+    if (location.state?.openForm) {
+      setShowAddForm(true);
+      // Clear the state to avoid reopening on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const getIconForType = (type: string) => {
     switch (type) {

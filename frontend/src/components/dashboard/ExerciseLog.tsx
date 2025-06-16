@@ -12,6 +12,10 @@ const ExerciseLog = () => {
 
   const handleAddExercise = () => {
     navigate('/exercises', { state: { openForm: true } });
+    // Scroll to top after navigation
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 100);
   };
 
   // Map of exercise types to their icon colors

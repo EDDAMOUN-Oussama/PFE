@@ -1,4 +1,4 @@
-
+import { useState } from 'react';
 import { HealthProvider } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
@@ -6,9 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, Stethoscope, FlaskConical, Plus, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import NewAppointmentForm from '@/components/appointments/NewAppointmentForm';
+import ConsultationForm from '@/components/appointments/ConsultationForm';
 
 const AppointmentsPageContent = () => {
   const { t } = useI18n();
+  const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
+  const [isConsultationOpen, setIsConsultationOpen] = useState(false);
 
   const upcomingAppointments = [
     {
@@ -79,15 +84,58 @@ const AppointmentsPageContent = () => {
     }
   };
 
+  const handleNewAppointment = (data: any) => {
+    console.log('Nouveau rendez-vous:', data);
+    setIsNewAppointmentOpen(false);
+  };
+
+  const handleConsultation = (data: any) => {
+    console.log('Nouvelle consultation:', data);
+    setIsConsultationOpen(false);
+  };
+
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">{t('appointments.title')}</h1>
-          <Button className="flex items-center">
-            <Plus className="h-4 w-4 mr-2" />
-            {t('appointments.newAppointment')}
-          </Button>
+          <div className="flex space-x-2">
+            <Dialog open={isNewAppointmentOpen} onOpenChange={setIsNewAppointmentOpen}>
+              <DialogTrigger asChild>
+                <Button className="flex items-center">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau rendez-vous
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Nouveau rendez-vous</DialogTitle>
+                </DialogHeader>
+                <NewAppointmentForm
+                  onSubmit={handleNewAppointment}
+                  onCancel={() => setIsNewAppointmentOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isConsultationOpen} onOpenChange={setIsConsultationOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="flex items-center">
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  Consultation
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Demande de consultation</DialogTitle>
+                </DialogHeader>
+                <ConsultationForm
+                  onSubmit={handleConsultation}
+                  onCancel={() => setIsConsultationOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -113,7 +161,11 @@ const AppointmentsPageContent = () => {
               <CardDescription>{t('appointments.scheduleDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button variant="outline" className="w-full">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setIsNewAppointmentOpen(true)}
+              >
                 {t('appointments.newAppointment')}
               </Button>
             </CardContent>
@@ -186,7 +238,7 @@ const AppointmentsPageContent = () => {
                 <p className="text-sm text-muted-foreground mb-4">
                   {t('appointments.scheduleFirst')}
                 </p>
-                <Button>
+                <Button onClick={() => setIsNewAppointmentOpen(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   {t('appointments.newAppointment')}
                 </Button>

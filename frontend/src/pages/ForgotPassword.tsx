@@ -77,7 +77,7 @@ export default function ForgotPassword() {
           />
 
           <Button type="submit" className="w-full">
-            Envoyer le lien
+            Envoyer le code
           </Button>
 
           <div className="text-center text-sm">

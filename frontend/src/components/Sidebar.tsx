@@ -26,6 +26,7 @@ const Sidebar = () => {
     { icon: User, label: t('nav.profile'), path: '/profile' },
     { icon: Settings, label: t('nav.settings'), path: '/settings' },
     { icon: ShieldCheck, label: t('nav.admin'), path: '/admin' },
+    { icon: ShieldCheck, label: 'Spécialiste', path: '/specialist' },
   ];
 
   const handleLogout = () => {
@@ -35,6 +36,10 @@ const Sidebar = () => {
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+
+  const handleUserInfoClick = () => {
+    navigate('/profile');
   };
 
   return (
@@ -86,21 +91,28 @@ const Sidebar = () => {
       
       <div className={`p-4 border-t border-sidebar-border ${collapsed ? 'items-center' : ''}`}>
         {!collapsed ? (
-          <div className="flex items-center">
+          <button 
+            onClick={handleUserInfoClick}
+            className="flex items-center w-full p-2 rounded-md hover:bg-sidebar-accent transition-colors"
+          >
             <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-xl font-bold">
               JD
             </div>
-            <div className="ml-3">
+            <div className="ml-3 text-left">
               <p className="text-sm font-medium">John Doe</p>
               <p className="text-xs text-sidebar-foreground/70">john@example.com</p>
             </div>
-          </div>
+          </button>
         ) : (
-          <div className="flex justify-center">
+          <button 
+            onClick={handleUserInfoClick}
+            className="flex justify-center w-full p-2 rounded-md hover:bg-sidebar-accent transition-colors"
+            title="Aller au profil"
+          >
             <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-xl font-bold">
               JD
             </div>
-          </div>
+          </button>
         )}
         
         <button
