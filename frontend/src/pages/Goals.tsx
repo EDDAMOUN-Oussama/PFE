@@ -1,11 +1,22 @@
-
+import { useState } from 'react';
 import { HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Target, Scale, Activity, Utensils, Trophy } from 'lucide-react';
+import { Target, Scale, Activity, Utensils, Trophy, Plus } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import AddGoalForm from '@/components/goals/AddGoalForm';
 
 const GoalsPageContent = () => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
@@ -92,9 +103,20 @@ const GoalsPageContent = () => {
               <p className="text-muted-foreground mb-4">
                 Définir des objectifs clairs et mesurables vous aide à rester motivé dans votre parcours de santé.
               </p>
-              <div className="border rounded-md p-4 text-center">
-                <p>Cliquez ici pour créer un nouvel objectif de santé ou de fitness</p>
-              </div>
+              <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="w-full">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Cliquez ici pour créer un nouvel objectif de santé ou de fitness
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle>Créer un nouvel objectif</DialogTitle>
+                  </DialogHeader>
+                  <AddGoalForm onFinished={() => setIsDialogOpen(false)} />
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>

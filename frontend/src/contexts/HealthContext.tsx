@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define types for health data
 interface Goal {
   id: string;
+  title: string;
   type: string;
   target: number;
   currentValue: number;
@@ -67,6 +69,7 @@ interface HealthContextType {
   addWeightEntry: (weightEntry: { weight: number; date: string }) => void;
   addFoodEntry: (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fat?: number; date: string }) => void;
   addExerciseEntry: (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string; }) => void;
+  addGoal: (goal: { title: string; type: string; target: number; currentValue: number; progress: number; deadline?: string }) => void;
 }
 
 const HealthContext = createContext<HealthContextType | undefined>(undefined);
@@ -75,6 +78,7 @@ const HealthContext = createContext<HealthContextType | undefined>(undefined);
 const mockGoals: Goal[] = [
   {
     id: '1',
+    title: 'Perdre du poids',
     type: 'weight',
     target: 70,
     currentValue: 75,
@@ -83,6 +87,7 @@ const mockGoals: Goal[] = [
   },
   {
     id: '2',
+    title: 'Calories quotidiennes',
     type: 'calories',
     target: 2000,
     currentValue: 1800,
@@ -90,6 +95,7 @@ const mockGoals: Goal[] = [
   },
   {
     id: '3',
+    title: 'Exercice hebdomadaire',
     type: 'exercise',
     target: 300,
     currentValue: 200,
@@ -207,7 +213,7 @@ const mockUser: User = {
 };
 
 export function HealthProvider({ children }: { children: React.ReactNode }) {
-  const [goals] = useState<Goal[]>(mockGoals);
+  const [goals, setGoals] = useState<Goal[]>(mockGoals);
   const [exerciseEntries, setExerciseEntries] = useState<ExerciseEntry[]>(mockExerciseEntries);
   const [foodEntries, setFoodEntries] = useState<FoodEntry[]>(mockFoodEntries);
   const [weightEntries, setWeightEntries] = useState<WeightEntry[]>(mockWeightEntries);
@@ -265,6 +271,20 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     console.log(`Exercise added: ${exerciseEntry.name} - ${exerciseEntry.duration} min`);
   };
 
+  const addGoal = (goal: { title: string; type: string; target: number; currentValue: number; progress: number; deadline?: string }) => {
+    const newGoal: Goal = {
+      id: Date.now().toString(),
+      title: goal.title,
+      type: goal.type,
+      target: goal.target,
+      currentValue: goal.currentValue,
+      progress: goal.progress,
+      deadline: goal.deadline,
+    };
+    setGoals(prev => [...prev, newGoal]);
+    console.log(`Goal added: ${goal.title} - ${goal.type}`);
+  };
+
   return (
     <HealthContext.Provider value={{ 
       goals, 
@@ -275,7 +295,8 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       user, 
       addWeightEntry,
       addFoodEntry,
-      addExerciseEntry
+      addExerciseEntry,
+      addGoal
     }}>
       {children}
     </HealthContext.Provider>
@@ -288,4 +309,4 @@ export const useHealth = () => {
     throw new Error('useHealth must be used within a HealthProvider');
   }
   return context;
-}
+};

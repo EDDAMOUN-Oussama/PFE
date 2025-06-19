@@ -13,7 +13,7 @@ const SpecialistPage = () => {
   const [selectedQuestion, setSelectedQuestion] = useState<any>(null);
   const [response, setResponse] = useState('');
 
-  // Mock data for questions and requests 
+  // Mock data for questions and requests
   const pendingQuestions = [
     {
       id: 1,
