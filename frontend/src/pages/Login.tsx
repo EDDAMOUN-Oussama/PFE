@@ -51,6 +51,7 @@ export default function Login() {
       if (result.success) {
         toast.success('Connexion réussie !');
         localStorage.setItem('user', JSON.stringify(result.user));
+        localStorage.setItem('user_id', result.user.id.toString());
         navigate('/dashboard');
       } else {
         toast.error(result.message || 'Échec de la connexion');
