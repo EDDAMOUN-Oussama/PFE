@@ -77,6 +77,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   };
+<<<<<<< HEAD
 
   useEffect(() => {
     loadUser();
@@ -85,6 +86,30 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   const addWeightEntry = (weightEntry: { weight: number; date: string }) => { /*...*/ };
   const addFoodEntry = (foodEntry: { name: string; mealType: string; calories: number; }) => { /*...*/ };
   const addExerciseEntry = (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; }) => { /*...*/ };
+=======
+
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const addWeightEntry = (weightEntry: { weight: number; date: string }) => { /*...*/ };
+  const addFoodEntry = (foodEntry: { name: string; mealType: string; calories: number; }) => { /*...*/ };
+  const addExerciseEntry = (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; }) => { /*...*/ };
+
+  const addGoal = (goal: { title: string; type: string; target: number; currentValue: number; progress: number; deadline?: string }) => {
+    const newGoal: Goal = {
+      id: Date.now().toString(),
+      title: goal.title,
+      type: goal.type,
+      target: goal.target,
+      currentValue: goal.currentValue,
+      progress: goal.progress,
+      deadline: goal.deadline,
+    };
+    setGoals(prev => [...prev, newGoal]);
+    console.log(`Goal added: ${goal.title} - ${goal.type}`);
+  };
+>>>>>>> 7a729925825db6904d482e6d9e23e2d4b8f12c65
 
   return (
     <HealthContext.Provider value={{
