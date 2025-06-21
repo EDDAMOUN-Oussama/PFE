@@ -36,6 +36,7 @@ const Sidebar = () => {
   const handleLogout = () => {
     // Vider le localStorage à la déconnexion pour plus de sécurité
     localStorage.removeItem('user_id');
+    localStorage.removeItem('user');
     toast.success('Déconnexion réussie');
     navigate('/login');
   };
