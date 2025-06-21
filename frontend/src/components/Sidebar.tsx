@@ -1,15 +1,12 @@
+
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Home, Activity, BarChart, Utensils, Dumbbell, Target, Calendar, 
-  User, Settings, LogOut, ShieldCheck, ChevronLeft, ChevronRight, Bell 
-} from 'lucide-react';
+import { Home, Activity, BarChart, Utensils, Dumbbell, Target, Calendar, User, Settings, LogOut, ShieldCheck, ChevronLeft, ChevronRight, Bell } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useI18n } from '@/contexts/I18nContext';
 import { useHealth } from '@/contexts/HealthContext';
-
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,11 +28,13 @@ const Sidebar = () => {
     { icon: User, label: t('nav.profile'), path: '/profile' },
     { icon: Settings, label: t('nav.settings'), path: '/settings' },
     { icon: ShieldCheck, label: t('nav.admin'), path: '/admin' },
+    { icon: ShieldCheck, label: 'Spécialiste', path: '/specialist' },
   ];
 
   const handleLogout = () => {
     // Vider le localStorage à la déconnexion pour plus de sécurité
     localStorage.removeItem('user_id');
+    localStorage.removeItem('user');
     toast.success('Déconnexion réussie');
     navigate('/login');
   };
@@ -43,17 +42,21 @@ const Sidebar = () => {
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
-  
-  // Fonction pour générer les initiales à partir du nom
-  const getInitials = (name: string) => {
-    if (!name) return '?';
-    const names = name.split(' ');
-    if (names.length > 1) {
-      return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
+
+  const handleUserInfoClick = () => {
+    navigate('/profile');
   };
 
+    // Fonction pour générer les initiales à partir du nom
+    const getInitials = (name: string) => {
+      if (!name) return '?';
+      const names = name.split(' ');
+      if (names.length > 1) {
+        return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
+      }
+      return name.substring(0, 2).toUpperCase();
+    };
+    
   return (
     <div className={`h-screen ${collapsed ? 'w-16' : 'w-64'} bg-sidebar fixed left-0 top-0 text-sidebar-foreground flex flex-col transition-width duration-300`}>
       <div className={`p-4 flex ${collapsed ? 'justify-center' : 'justify-between'} items-center`}>
@@ -101,9 +104,12 @@ const Sidebar = () => {
         </ul>
       </nav>
       
-      <div className={`p-4 border-t border-sidebar-border`}>
-        {user ? (
-          <div className={`flex items-center ${collapsed ? 'justify-center' : ''}`}>
+      <div className={`p-4 border-t border-sidebar-border ${collapsed ? 'items-center' : ''}`}>
+        {!user ? (
+          <button 
+            onClick={handleUserInfoClick}
+            className="flex items-center w-full p-2 rounded-md hover:bg-sidebar-accent transition-colors"
+          >
             <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-xl font-bold">
               {getInitials(user.name)}
             </div>
@@ -113,7 +119,7 @@ const Sidebar = () => {
                 <p className="text-xs text-sidebar-foreground/70">{user.email}</p>
               </div>
             )}
-          </div>
+          </button>
         ) : (
           <div className="h-10">
             {/* Espace vide pendant que l'utilisateur charge */}

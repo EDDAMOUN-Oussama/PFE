@@ -9,12 +9,16 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
+import { EditProfileForm } from '@/components/profile/EditProfileForm';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
 
 const SettingsPageContent = () => {
   const { t } = useI18n();
   const [isMobile, setIsMobile] = useState(false);
+  const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
+  const [showEditProfileForm, setShowEditProfileForm] = useState(false);
 
   useEffect(() => {
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768);
@@ -97,7 +101,13 @@ const SettingsPageContent = () => {
                       <h3 className="font-medium">{t('settings.changePassword')}</h3>
                       <p className="text-sm text-muted-foreground">{t('settings.changePasswordDesc')}</p>
                     </div>
-                    <Button variant="outline" className="mt-2 md:mt-0">{t('button.update')}</Button>
+                    <Button 
+                      variant="outline" 
+                      className="mt-2 md:mt-0"
+                      onClick={() => setShowChangePasswordForm(true)}
+                    >
+                      Mettre à jour
+                    </Button>
                   </div>
                   
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
@@ -105,7 +115,13 @@ const SettingsPageContent = () => {
                       <h3 className="font-medium">{t('settings.emailAddress')}</h3>
                       <p className="text-sm text-muted-foreground">john@example.com</p>
                     </div>
-                    <Button variant="outline" className="mt-2 md:mt-0">{t('button.change')}</Button>
+                    <Button 
+                      variant="outline" 
+                      className="mt-2 md:mt-0"
+                      onClick={() => setShowEditProfileForm(true)}
+                    >
+                      {t('button.change')}
+                    </Button>
                   </div>
                   
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -181,6 +197,16 @@ const SettingsPageContent = () => {
           </div>
         </div>
       </div>
+
+      <ChangePasswordForm 
+        open={showChangePasswordForm} 
+        onOpenChange={setShowChangePasswordForm} 
+      />
+      
+      <EditProfileForm 
+        open={showEditProfileForm} 
+        onOpenChange={setShowEditProfileForm} 
+      />
     </div>
   );
 };

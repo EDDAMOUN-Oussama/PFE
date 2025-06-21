@@ -4,17 +4,21 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { toast } from 'sonner';
-import { Mail, User, Calendar } from 'lucide-react';
+import { Mail, User } from 'lucide-react';
+import { EmailVerificationDialog } from './EmailVerificationDialog';
+import { DatePickerField } from './DatePickerField';
+import { InputField } from './InputField';
 
 const profileSchema = z.object({
   firstName: z.string().min(2, 'Le prénom doit contenir au moins 2 caractères'),
   lastName: z.string().min(2, 'Le nom doit contenir au moins 2 caractères'),
   email: z.string().email('Adresse email invalide'),
+  dateOfBirth: z.date({
+    required_error: "La date de naissance est requise",
+  }),
   age: z.number().min(1, 'L\'âge doit être valide').max(120, 'L\'âge doit être valide'),
 });
 
@@ -27,7 +31,6 @@ interface EditProfileFormProps {
 
 export const EditProfileForm = ({ open, onOpenChange }: EditProfileFormProps) => {
   const [needsEmailVerification, setNeedsEmailVerification] = useState(false);
-  const [verificationCode, setVerificationCode] = useState('');
   const [newEmail, setNewEmail] = useState('');
 
   const form = useForm<ProfileFormData>({
@@ -36,6 +39,7 @@ export const EditProfileForm = ({ open, onOpenChange }: EditProfileFormProps) =>
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@example.com',
+      dateOfBirth: new Date('1992-01-01'),
       age: 32,
     },
   });
@@ -53,54 +57,24 @@ export const EditProfileForm = ({ open, onOpenChange }: EditProfileFormProps) =>
     }
   };
 
-  const handleEmailVerification = () => {
-    if (verificationCode.length === 6) {
-      toast.success('Email vérifié et profil mis à jour avec succès');
-      setNeedsEmailVerification(false);
-      onOpenChange(false);
-    } else {
-      toast.error('Code de vérification invalide');
-    }
+  const handleVerificationComplete = () => {
+    setNeedsEmailVerification(false);
+    onOpenChange(false);
+  };
+
+  const handleVerificationCancel = () => {
+    setNeedsEmailVerification(false);
   };
 
   if (needsEmailVerification) {
     return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Vérification de l'email</DialogTitle>
-            <DialogDescription>
-              Veuillez entrer le code de vérification envoyé à {newEmail}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="verification-code">Code de vérification</Label>
-              <Input
-                id="verification-code"
-                placeholder="Entrez le code à 6 chiffres"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-                maxLength={6}
-              />
-            </div>
-            
-            <div className="flex space-x-2">
-              <Button onClick={handleEmailVerification} className="flex-1">
-                Vérifier
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setNeedsEmailVerification(false)}
-                className="flex-1"
-              >
-                Annuler
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <EmailVerificationDialog
+        open={open}
+        onOpenChange={onOpenChange}
+        newEmail={newEmail}
+        onVerificationComplete={handleVerificationComplete}
+        onCancel={handleVerificationCancel}
+      />
     );
   }
 
@@ -116,77 +90,32 @@ export const EditProfileForm = ({ open, onOpenChange }: EditProfileFormProps) =>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
+            <InputField
               control={form.control}
               name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Prénom</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Prénom"
+              icon={User}
             />
 
-            <FormField
+            <InputField
               control={form.control}
               name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nom</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Nom"
+              icon={User}
             />
 
-            <FormField
+            <InputField
               control={form.control}
               name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input className="pl-10" type="email" {...field} />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              label="Email"
+              type="email"
+              icon={Mail}
             />
 
-            <FormField
+            <DatePickerField
               control={form.control}
-              name="age"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Âge</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Calendar className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        className="pl-10" 
-                        type="number" 
-                        {...field}
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              name="dateOfBirth"
+              label="Date de naissance"
             />
 
             <div className="flex space-x-2 pt-4">
