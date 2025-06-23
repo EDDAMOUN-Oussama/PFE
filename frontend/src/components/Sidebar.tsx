@@ -105,7 +105,7 @@ const Sidebar = () => {
       </nav>
       
       <div className={`p-4 border-t border-sidebar-border ${collapsed ? 'items-center' : ''}`}>
-        {!user ? (
+        {user ? (
           <button 
             onClick={handleUserInfoClick}
             className="flex items-center w-full p-2 rounded-md hover:bg-sidebar-accent transition-colors"

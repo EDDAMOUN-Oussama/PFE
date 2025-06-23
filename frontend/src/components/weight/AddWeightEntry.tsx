@@ -12,12 +12,16 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const AddWeightEntry = () => {
-  const { addWeightEntry, user } = useHealth();
+  const { addWeightEntry, user, isLoading } = useHealth();
   const { t } = useI18n();
   const { toast } = useToast();
   const [weight, setWeight] = useState('');
   const [date, setDate] = useState<Date>(new Date());
 
+  if (isLoading || !user) {
+    return <div>{t('loading')}</div>; // Show loading state or spinner
+  }
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     

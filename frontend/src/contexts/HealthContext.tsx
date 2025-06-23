@@ -55,7 +55,8 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   const [dailyStats, setDailyStats] = useState<DailyStats>(mockDailyStats);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  
+  
   const loadUser = async () => {
     const storedUserId = localStorage.getItem('user_id');
     if (!storedUserId) {

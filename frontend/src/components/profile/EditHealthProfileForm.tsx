@@ -22,26 +22,45 @@ const healthProfileSchema = z.object({
 type HealthProfileFormData = z.infer<typeof healthProfileSchema>;
 
 interface EditHealthProfileFormProps {
+  user: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export const EditHealthProfileForm = ({ open, onOpenChange }: EditHealthProfileFormProps) => {
+export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: EditHealthProfileFormProps) => {
   const form = useForm<HealthProfileFormData>({
     resolver: zodResolver(healthProfileSchema),
     defaultValues: {
-      currentWeight: 75,
-      goalWeight: 70,
-      height: 175,
-      goalCalories: 2000,
-      activityLevel: 'moderate',
+      currentWeight: user.currentWeight || 70,
+      goalWeight: user.goalWeight || 65,
+      height: user.height || 175,
+      goalCalories: user.goalCalories || 2000,
+      activityLevel: user.activityLevel || 'Active',
     },
   });
 
-  const onSubmit = (data: HealthProfileFormData) => {
-    console.log('Health profile data:', data);
-    toast.success('Profil de santé mis à jour avec succès');
-    onOpenChange(false);
+  const onSubmit = async (data: HealthProfileFormData) => {
+    try {
+      const response = await fetch ('http://localhost/pfe/backend/controllers/updateUserHealth.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.id, ...data }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        toast.success('Profil de santé mis à jour avec succès');
+        await refetchUser();
+        onOpenChange(false);
+      } else {
+        toast.error('Erreur lors de la mise à jour du profil de santé');
+      }
+    }
+    catch (error) {
+      console.error('Error updating health profile:', error);
+      toast.error('Erreur lors de la mise à jour du profil de santé');
+    } 
   };
 
   return (
@@ -159,11 +178,11 @@ export const EditHealthProfileForm = ({ open, onOpenChange }: EditHealthProfileF
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="sedentary">Sédentaire</SelectItem>
-                      <SelectItem value="light">Légère activité</SelectItem>
-                      <SelectItem value="moderate">Activité modérée</SelectItem>
-                      <SelectItem value="active">Très actif</SelectItem>
-                      <SelectItem value="extra">Extrêmement actif</SelectItem>
+                    <SelectItem value="Sédentaire">Sédentaire (peu ou pas d'exercice)</SelectItem>
+                    <SelectItem value="Léger">Léger (exercice léger 1-3 jours/semaine)</SelectItem>
+                    <SelectItem value="Modéré">Modéré (exercice modéré 3-5 jours/semaine)</SelectItem>
+                    <SelectItem value="Actif">Actif (exercice intense 6-7 jours/semaine)</SelectItem>
+                    <SelectItem value="Très actif">Très actif (exercice très intense et travail physique)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />

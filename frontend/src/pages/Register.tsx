@@ -31,9 +31,10 @@ const registerSchema = z.object({
   }),
   currentWeight: z.number().int().min(1, { message: 'Le poids actuel est requis' }),
   goalWeight: z.number().int().min(1, { message: 'Le poids objectif est requis' }),
+  goalCalories: z.number().int().min(1, { message: 'Le poids objectif est requis' }),
   height: z.number().int().min(1, { message: 'La taille est requise' }),
   gender: z.enum(['male', 'female'], { message: 'Veuillez sélectionner votre sexe' }),
-  activityLevel: z.enum(['sedentary', 'light', 'moderate', 'active', 'very active'], { 
+  activityLevel: z.enum(['Sédentaire', 'Léger', 'Modéré', 'Actif', 'Très actif'], { 
     message: 'Veuillez sélectionner votre niveau d\'activité' 
   }),
   password: z.string().min(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' }),
@@ -389,6 +390,26 @@ export default function Register() {
             />
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="goalCalories"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Calories journalières (objectif)</FormLabel>
+                  <FormControl>
+                  <Input
+                      type="number"
+                      placeholder="2000"
+                      value={field.value || ''}
+                      onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value, 10) : '')}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
           <FormField
             control={form.control}
             name="height"
@@ -407,6 +428,7 @@ export default function Register() {
               </FormItem>
             )}
           />
+          </div>
 
           <FormField
             control={form.control}
@@ -448,11 +470,11 @@ export default function Register() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="sedentary">Sédentaire (peu ou pas d'exercice)</SelectItem>
-                    <SelectItem value="light">Léger (exercice léger 1-3 jours/semaine)</SelectItem>
-                    <SelectItem value="moderate">Modéré (exercice modéré 3-5 jours/semaine)</SelectItem>
-                    <SelectItem value="active">Actif (exercice intense 6-7 jours/semaine)</SelectItem>
-                    <SelectItem value="very active">Très actif (exercice très intense et travail physique)</SelectItem>
+                    <SelectItem value="Sédentaire">Sédentaire (peu ou pas d'exercice)</SelectItem>
+                    <SelectItem value="Léger">Léger (exercice léger 1-3 jours/semaine)</SelectItem>
+                    <SelectItem value="Modéré">Modéré (exercice modéré 3-5 jours/semaine)</SelectItem>
+                    <SelectItem value="Actif">Actif (exercice intense 6-7 jours/semaine)</SelectItem>
+                    <SelectItem value="Très actif">Très actif (exercice très intense et travail physique)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
