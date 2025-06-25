@@ -1,15 +1,33 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { HealthProvider } from '@/contexts/HealthContext';
+import { useHealth, HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Apple, Coffee, UtensilsCrossed, Plus } from 'lucide-react';
 import AddFoodForm from '@/components/nutrition/AddFoodForm';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 const NutritionPageContent = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const location = useLocation();
+
+const { foodEntries } = useHealth();
+
+const calculateMealData = (mealType: string) => {
+  const meals = foodEntries.filter(entry => entry.maleType === mealType);
+  const totalCalories = meals.reduce((sum, item) => sum + item.calories, 0);
+  return {
+    calories: totalCalories,
+    count: meals.length
+  };
+};
+
+const breakfast = calculateMealData('breakfast');
+const lunch = calculateMealData('lunch');
+const dinner = calculateMealData('dinner');
+
 
   useEffect(() => {
     // Check if we should open the form based on navigation state
@@ -21,8 +39,11 @@ const NutritionPageContent = () => {
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
-        <h1 className="text-3xl font-bold mb-6">Suivi Nutritionnel</h1>
-        
+        <h1 className="text-3xl font-bold mb-6">Suivi Nutritionnel
+          <span className="text-muted-foreground text-lg ml-2">
+            {format(new Date(), "dd MMMM yyyy", { locale: fr })}
+          </span>
+        </h1>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card>
             <CardHeader className="pb-2">
@@ -32,8 +53,9 @@ const NutritionPageContent = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">450 kcal</p>
-              <p className="text-sm text-muted-foreground">2 éléments suivis</p>
+              <p className="text-2xl font-bold">{breakfast.calories} kcal</p>
+              <p className="text-sm text-muted-foreground">{breakfast.count} éléments suivis</p>
+
             </CardContent>
           </Card>
           
@@ -45,8 +67,8 @@ const NutritionPageContent = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">620 kcal</p>
-              <p className="text-sm text-muted-foreground">3 éléments suivis</p>
+              <p className="text-2xl font-bold">{lunch.calories} kcal</p>
+              <p className="text-sm text-muted-foreground">{lunch.count} éléments suivis</p>
             </CardContent>
           </Card>
           
@@ -58,8 +80,9 @@ const NutritionPageContent = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">780 kcal</p>
-              <p className="text-sm text-muted-foreground">4 éléments suivis</p>
+              <p className="text-2xl font-bold">{dinner.calories} kcal</p>
+              <p className="text-sm text-muted-foreground">{dinner.count} éléments suivis</p>
+
             </CardContent>
           </Card>
         </div>

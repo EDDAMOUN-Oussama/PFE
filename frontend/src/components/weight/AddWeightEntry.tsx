@@ -19,7 +19,7 @@ const AddWeightEntry = () => {
   const [date, setDate] = useState<Date>(new Date());
 
   if (isLoading || !user) {
-    return <div>{t('loading')}</div>; // Show loading state or spinner
+    return <div>{t('loading')}</div>;
   }
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -34,6 +34,30 @@ const AddWeightEntry = () => {
       return;
     }
     
+    if (!date || isNaN(new Date(date).getTime())) {
+      toast({
+        title: "Invalid date",
+        description: "Please select a valid date",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const selectedDate = new Date(date);
+    selectedDate.setHours(0, 0, 0, 0);
+    
+    if (selectedDate > today) {
+      toast({
+        title: "Date invalide",
+        description: "Vous ne pouvez pas entrer un poids pour une date future.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Add the weight entry
     addWeightEntry({
       date: format(date, 'yyyy-MM-dd'),
@@ -43,29 +67,24 @@ const AddWeightEntry = () => {
     // Reset form
     setWeight('');
     
-    // Show success message
-    toast({
-      title: "Weight added",
-      description: "Your weight entry has been recorded successfully",
-    });
   };
 
   return (
     <Card className="shadow-sm">
       <CardHeader>
-        <CardTitle className="text-xl font-bold">{t('weight.addEntry')}</CardTitle>
+        <CardTitle className="text-xl font-bold">Ajouter une entrée de poids</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label htmlFor="weight" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                {t('weight.weightKg')}
+              Poids (kg)
               </label>
               <Input
                 id="weight"
                 type="number"
-                step="0.1"
+                step="1"
                 placeholder={user.currentWeight?.toString() || t('weight.enterWeight')}
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
@@ -74,28 +93,15 @@ const AddWeightEntry = () => {
             </div>
             
             <div>
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                {t('weight.date')}
+              <label htmlFor="date" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Date
               </label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal mt-1"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(date, 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(date) => date && setDate(date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <Input
+                id="date"
+                type="date"
+                value={format(date, 'yyyy-MM-dd')}
+                onChange={(e) => setDate(new Date(e.target.value))}
+              />
             </div>
           </div>
           

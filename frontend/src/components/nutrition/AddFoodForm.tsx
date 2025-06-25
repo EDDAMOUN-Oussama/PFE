@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useHealth } from '@/contexts/HealthContext';
 import { useToast } from '@/hooks/use-toast';
+
+function calculateCalories(protein: number = 0, carbs: number = 0, fat: number = 0): number {
+  const caloriesFromProtein = protein * 4;
+  const caloriesFromCarbs = carbs * 4;
+  const caloriesFromFat = fat * 9;
+  return caloriesFromProtein + caloriesFromCarbs + caloriesFromFat;
+}
 
 const AddFoodForm = () => {
   const [foodName, setFoodName] = useState('');
@@ -35,9 +42,9 @@ const AddFoodForm = () => {
       name: foodName,
       mealType,
       calories: parseInt(calories),
-      protein: protein ? parseInt(protein) : undefined,
-      carbs: carbs ? parseInt(carbs) : undefined,
-      fat: fat ? parseInt(fat) : undefined,
+      protein: protein ? parseInt(protein) : 0,
+      carbs: carbs ? parseInt(carbs) : 0,
+      fat: fat ? parseInt(fat) : 0,
       date: new Date().toISOString(),
     };
 
@@ -51,12 +58,17 @@ const AddFoodForm = () => {
     setCarbs('');
     setFat('');
 
-    toast({
-      title: "Aliment ajouté",
-      description: `${foodName} a été ajouté à votre journal alimentaire.`,
-    });
   };
 
+  useEffect(() => {
+    const p = Number(protein) || 0;
+    const c = Number(carbs) || 0;
+    const f = Number(fat) || 0;
+    const total = calculateCalories(p, c, f);
+    setCalories(total.toString());
+  }, [protein, carbs, fat]);
+
+  
   return (
     <Card className="mb-6">
       <CardHeader>
