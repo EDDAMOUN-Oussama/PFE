@@ -25,6 +25,7 @@ interface EditHealthProfileFormProps {
   user: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  refetchUser: () => Promise<void>;
 }
 
 export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: EditHealthProfileFormProps) => {
@@ -87,7 +88,7 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
                       <Input 
                         className="pl-10" 
                         type="number" 
-                        step="0.1"
+                        step="1"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
                       />

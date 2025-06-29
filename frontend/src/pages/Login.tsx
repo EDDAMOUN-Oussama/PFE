@@ -125,19 +125,23 @@ export default function Login() {
               </Link>
             </div>
           </div>
-
-          <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full">
             {t('auth.signIn')}
-          </Button>
+            </Button>
 
-          <div className="text-center text-sm">
+            <div className="text-center text-sm">
             <p>
-              {t('auth.noAccount')}{' '}
+            Vous n'avez pas de compte ?{' '}
               <Link to="/register" className="font-medium text-primary hover:text-primary/80">
-                {t('auth.signUp')}
+              {t('auth.signUp')}
               </Link>
             </p>
-          </div>
+            <p className="mt-2">
+              <Link to="/" className="font-medium text-primary hover:text-primary/80">
+              Retour à l'accueil
+              </Link>
+            </p>
+            </div>
         </form>
       </Form>
     </AuthLayout>

@@ -4,7 +4,7 @@ import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { User, Mail, Calendar, Ruler, Scale, Activity, Edit2, Loader2, Stethoscope, CheckCircle } from 'lucide-react';
+import { User, Mail, Calendar, Ruler, Scale, Activity, Edit2, Loader2, } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
@@ -75,32 +75,9 @@ const ProfilePageContent = () => {
                 >
                   <Edit2 className="h-4 w-4 mr-2" /> Modifier le profil
                 </Button>
-                
-                {!showSpecialistRequest && (
-                  <Button 
-                    variant="default" 
-                    className="w-full mt-2 flex items-center justify-center"
-                    onClick={handleSpecialistRequest}
-                  >
-                    <Stethoscope className="h-4 w-4 mr-2" /> 
-                    Devenir Spécialiste
-                  </Button>
-                )}
-                
-                {showSpecialistRequest && (
-                  <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-md">
-                    <div className="flex items-center">
-                      <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                      <span className="text-sm text-green-800">
-                        Demande de spécialiste en cours de traitement
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-          
+                </div>
+              </CardContent>
+            </Card>
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Informations de santé</CardTitle>

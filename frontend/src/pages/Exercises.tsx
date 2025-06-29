@@ -1,20 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useHealth } from '@/contexts/HealthContext';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Dumbbell, Bike, Timer, Activity, Plus } from 'lucide-react';
+import { Dumbbell, Bike, StretchHorizontal, Timer, Activity, Plus, Dribbble, HeartPulse } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import AddExerciseForm from '@/components/exercises/AddExerciseForm';
-import { HealthProvider } from '@/contexts/HealthContext';
+import { useHealth, HealthProvider } from '@/contexts/HealthContext';
 import Sidebar from '@/components/Sidebar';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+
 
 const ExercisesPageContent = () => {
   const { exerciseEntries } = useHealth();
   const location = useLocation();
   const [showAddForm, setShowAddForm] = useState(false);
+    const { goals } = useHealth();
 
   useEffect(() => {
     if (location.state?.openForm) {
@@ -27,12 +28,15 @@ const ExercisesPageContent = () => {
     const baseClass = "h-5 w-5 mr-3 text-primary";
     switch (type) {
       case 'cardio':
-        return <Bike className={baseClass} />;
+        return <HeartPulse className={baseClass} />;
       case 'Musculation':
         return <Dumbbell className={baseClass} />;
       case 'Flexibilité':
+        return <Bike className={baseClass} />;
       case 'sports':
+        return <Dribbble className={baseClass} />;
       case 'Autre':
+        return <Activity className={baseClass} />;
       default:
         return <Activity className={baseClass} />;
     }
@@ -60,9 +64,13 @@ const ExercisesPageContent = () => {
     { minutes: 0, calories: 0 }
   );
 
-  const weeklyGoal = 150;
-  const progress = Math.min((totalSummary.minutes / weeklyGoal) * 100, 100);
 
+  const exerciseGoals = goals.filter(g => g.type === 'exercise');
+
+  const totalTarget = exerciseGoals.reduce((sum, g) => sum + g.target, 0);
+  const totalCurrent = exerciseGoals.reduce((sum, g) => sum + g.currentValue, 0);
+  
+  const progress = totalTarget > 0 ? Math.min((totalCurrent / totalTarget) * 100, 100) : 0;
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
@@ -115,14 +123,14 @@ const ExercisesPageContent = () => {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Objectif Hebdomadaire d'Exercice</CardTitle>
-            <CardDescription>150 minutes d'activité physique par semaine</CardDescription>
+            <CardDescription>{totalTarget} minutes d'activité physique</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-sm font-medium">Progrès</span>
                 <span className="text-sm text-muted-foreground">
-                  {totalSummary.minutes}/{weeklyGoal} min
+                  {totalCurrent}/{totalTarget} min
                 </span>
               </div>
               <Progress value={progress} />
