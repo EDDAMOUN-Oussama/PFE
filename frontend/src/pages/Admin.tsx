@@ -1,222 +1,112 @@
-
+import { useEffect, useState } from 'react';
 import { HealthProvider } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Activity, UserPlus, Shield, Settings, BarChart, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Users, Activity, UserPlus, Shield, Settings, CheckCircle, X, User, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from 'sonner';
 
 const AdminPageContent = () => {
   const { t } = useI18n();
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const recentActivities = [
-    {
-      id: '1',
-      type: 'registration',
-      user: 'Sophie Martin',
-      action: t('admin.userRegistered'),
-      time: '2 ' + t('admin.minutes'),
-      ago: t('admin.ago')
-    },
-    {
-      id: '2',
-      type: 'profile',
-      user: 'Pierre Durand',
-      action: t('admin.profileUpdated'),
-      time: '15 ' + t('admin.minutes'),
-      ago: t('admin.ago')
-    },
-    {
-      id: '3',
-      type: 'goal',
-      user: 'Marie Lefebvre',
-      action: t('admin.goalSet'),
-      time: '1 ' + t('admin.hour'),
-      ago: t('admin.ago')
-    },
-    {
-      id: '4',
-      type: 'exercise',
-      user: 'Jean Dubois',
-      action: t('admin.exerciseLogged'),
-      time: '2 ' + t('admin.hours'),
-      ago: t('admin.ago')
-    },
-    {
-      id: '5',
-      type: 'appointment',
-      user: 'Anne Bernard',
-      action: t('admin.appointmentScheduled'),
-      time: '1 ' + t('admin.day'),
-      ago: t('admin.ago')
-    }
-  ];
-
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'registration':
-        return <UserPlus className="h-4 w-4 text-green-500" />;
-      case 'profile':
-        return <Users className="h-4 w-4 text-blue-500" />;
-      case 'goal':
-        return <Activity className="h-4 w-4 text-purple-500" />;
-      case 'exercise':
-        return <Activity className="h-4 w-4 text-orange-500" />;
-      case 'appointment':
-        return <Clock className="h-4 w-4 text-pink-500" />;
-      default:
-        return <Activity className="h-4 w-4" />;
+  const fetchRequests = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost/pfe/backend/controllers/getSpecialistRequests.php');
+      const data = await response.json();
+      if (data.success) {
+        setRequests(data.requests);
+      } else {
+        toast.error("Erreur lors du chargement des demandes.");
+      }
+    } catch (error) {
+      toast.error("Impossible de charger les demandes.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    fetchRequests();
+  }, []);
+
+  const handleRequestUpdate = async (requestId, newStatus) => {
+    try {
+      const response = await fetch('http://localhost/pfe/backend/controllers/updateSpecialistRequest.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ request_id: requestId, new_status: newStatus }),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`Demande ${newStatus === 'approved' ? 'approuvée' : 'rejetée'}.`);
+        setRequests(prev => prev.filter(req => req.id !== requestId));
+      } else {
+        toast.error(`Erreur : ${result.message}`);
+      }
+    } catch (error) {
+      toast.error("Erreur de connexion.");
+    }
+  };
+  
   return (
     <div className="flex-1 ml-64">
       <div className="container p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">{t('admin.title')}</h1>
-          <Button variant="outline" className="flex items-center">
-            <Settings className="h-4 w-4 mr-2" />
-            {t('admin.systemSettings')}
-          </Button>
-        </div>
+        <h1 className="text-3xl font-bold mb-6">{t('admin.title')}</h1>
+        {/* ... Cartes de statistiques ... */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <Users className="mr-2 h-5 w-5 text-primary" />
-                {t('admin.totalUsers')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">2,847</p>
-              <p className="text-sm text-green-500">+12% {t('admin.thisMonth')}</p>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
+            <TabsTrigger value="specialists">Demandes Spécialistes ({requests.length})</TabsTrigger>
+          </TabsList>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <Activity className="mr-2 h-5 w-5 text-green-500" />
-                {t('admin.activeUsers')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">1,534</p>
-              <p className="text-sm text-green-500">+8% {t('admin.thisMonth')}</p>
-            </CardContent>
-          </Card>
+          <TabsContent value="overview">{/* ... Contenu de la vue d'ensemble ... */}</TabsContent>
 
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <UserPlus className="mr-2 h-5 w-5 text-blue-500" />
-                {t('admin.newRegistrations')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold">23</p>
-              <p className="text-sm text-blue-500">{t('admin.today')}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium flex items-center">
-                <Shield className="mr-2 h-5 w-5 text-purple-500" />
-                {t('admin.systemHealth')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-2xl font-bold text-green-500">{t('admin.excellent')}</p>
-              <p className="text-sm text-muted-foreground">99.9% uptime</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <Card className="lg:col-span-1">
-            <CardHeader>
-              <CardTitle>{t('admin.userManagement')}</CardTitle>
-              <CardDescription>{t('admin.userManagementDesc')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Button className="w-full flex items-center justify-center">
-                <Users className="h-4 w-4 mr-2" />
-                {t('admin.manageUsers')}
-              </Button>
-              <Button variant="outline" className="w-full flex items-center justify-center">
-                <BarChart className="h-4 w-4 mr-2" />
-                {t('admin.viewReports')}
-              </Button>
-              <Button variant="outline" className="w-full flex items-center justify-center">
-                <Settings className="h-4 w-4 mr-2" />
-                {t('admin.systemSettings')}
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>{t('admin.systemStats')}</CardTitle>
-              <CardDescription>{t('admin.systemStatsDesc')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-muted/30 p-4 rounded-md">
-                  <p className="text-sm text-muted-foreground">Stockage utilisé</p>
-                  <p className="text-2xl font-bold">67%</p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-md">
-                  <p className="text-sm text-muted-foreground">Bande passante</p>
-                  <p className="text-2xl font-bold">12.4 GB</p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-md">
-                  <p className="text-sm text-muted-foreground">Requêtes API</p>
-                  <p className="text-2xl font-bold">45,230</p>
-                </div>
-                <div className="bg-muted/30 p-4 rounded-md">
-                  <p className="text-sm text-muted-foreground">Temps de réponse</p>
-                  <p className="text-2xl font-bold">124ms</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{t('admin.recentActivity')}</CardTitle>
-            <CardDescription>{t('admin.recentActivityDesc')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {recentActivities.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    {getActivityIcon(activity.type)}
-                    <div>
-                      <p className="font-medium">{activity.user}</p>
-                      <p className="text-sm text-muted-foreground">{activity.action}</p>
-                    </div>
+          <TabsContent value="specialists" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Demandes de Spécialistes</CardTitle>
+                <CardDescription>Gérez les demandes des utilisateurs pour devenir spécialistes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="flex justify-center py-8"><Loader2 className="h-8 w-8 animate-spin" /></div>
+                ) : requests.length > 0 ? (
+                  <div className="space-y-4">
+                    {requests.map((request) => (
+                      <div key={request.id} className="p-4 border rounded-lg flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center"><User className="h-6 w-6 text-primary" /></div>
+                          <div><h4 className="font-medium">{request.name}</h4><p className="text-sm text-muted-foreground">{request.email}</p></div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button size="sm" variant="outline" onClick={() => handleRequestUpdate(request.id, 'approved')} className="text-green-600 border-green-600 hover:bg-green-50">
+                            <CheckCircle className="h-4 w-4 mr-1" /> Approuver
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleRequestUpdate(request.id, 'rejected')} className="text-red-600 border-red-600 hover:bg-red-50">
+                            <X className="h-4 w-4 mr-1" /> Rejeter
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-muted-foreground">
-                      {activity.ago} {activity.time}
-                    </p>
-                    <Badge variant="secondary" className="mt-1">
-                      Récent
-                    </Badge>
+                ) : (
+                  <div className="text-center py-8">
+                    <Shield className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="font-medium mb-2">Aucune demande en attente</h3>
+                    <p className="text-sm text-muted-foreground">Toutes les demandes de spécialistes ont été traitées.</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

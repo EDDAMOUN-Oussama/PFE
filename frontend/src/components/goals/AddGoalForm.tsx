@@ -29,11 +29,13 @@ const formSchema = z.object({
   }),
   target: z.coerce.number().min(1, { message: "La cible doit être d'au moins 1." }),
   currentValue: z.coerce.number().min(0, { message: "La valeur actuelle doit être positive." }),
-  deadline: z.string().optional(),
+  deadline: z.string().refine((date) => !date || new Date(date) >= new Date(new Date().setHours(0, 0, 0, 0)), {
+    message: "La date limite ne peut pas être antérieure à aujourd'hui."
+  })
 });
 
 export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
-  const { addGoal } = useHealth();
+  const { user, addGoal } = useHealth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -41,14 +43,24 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       title: "",
       type: "weight",
       target: 0,
-      currentValue: 0,
+      currentValue: user.currentWeight | 0,
       deadline: "",
     },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const progress = values.target > 0 ? Math.min((values.currentValue / values.target) * 100, 100) : 0;
-    
+    if (values.type === "weight" && values.currentValue > values.target) {
+      toast.error("La valeur actuelle ne peut pas être inférieure ou égale à la cible pour un objectif de poids.");
+      return;
+    } else if (values.type === "calories" && values.currentValue > values.target) {
+      toast.error("La valeur actuelle ne peut pas être supérieure à la cible pour un objectif de calories.");
+      return;
+    } else if (values.type === "exercise" && values.currentValue > values.target) {
+      toast.error("La valeur actuelle ne peut pas être supérieure à la cible pour un objectif d'exercice.");
+      return;
+    }
+
     addGoal({
       title: values.title,
       type: values.type,
@@ -58,7 +70,6 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       deadline: values.deadline || undefined,
     });
     
-    toast.success("Objectif ajouté avec succès !");
     form.reset();
     if (onFinished) {
       onFinished();
@@ -90,7 +101,7 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
             <FormItem>
               <FormLabel>Titre de l'objectif</FormLabel>
               <FormControl>
-                <Input placeholder="Mon objectif de poids" {...field} />
+                <Input placeholder="Mon objectif " {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -155,7 +166,7 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
           name="deadline"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Date limite (optionnel)</FormLabel>
+              <FormLabel>Date limite</FormLabel>
               <FormControl>
                 <Input type="date" {...field} />
               </FormControl>

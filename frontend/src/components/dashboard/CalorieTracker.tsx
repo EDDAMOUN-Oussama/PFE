@@ -7,28 +7,29 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const CalorieTracker = () => {
-  const { foodEntries, dailyStats, user } = useHealth();
+  const { foodEntries, dailyStats, user, fetchDailyStats } = useHealth();
   const { t } = useI18n();
   const navigate = useNavigate();
   
+  fetchDailyStats();
+
   const goalCalories = user.goalCalories || 2000;
   const remainingCalories = Math.max(0, goalCalories - dailyStats.caloriesConsumed);
   
-  // Data for pie chart
   const data = [
     { name: t('dashboard.consumed'), value: dailyStats.caloriesConsumed, color: '#0ea5e9' },
     { name: t('dashboard.remaining'), value: remainingCalories, color: '#e4e4e7' },
   ];
   
-  // Calculate macros
+ 
   const getTotalMacros = () => {
     return foodEntries.reduce(
       (acc, entry) => ({
         protein: acc.protein + (entry.protein || 0),
         carbs: acc.carbs + (entry.carbs || 0),
-        fat: acc.fat + (entry.fat || 0)
+        fats: acc.fats + (entry.fats || 0)
       }),
-      { protein: 0, carbs: 0, fat: 0 }
+      { protein: 0, carbs: 0, fats: 0 }
     );
   };
   
@@ -41,9 +42,9 @@ const CalorieTracker = () => {
   return (
     <div className="health-card">
       <div className="health-card-header">
-        <h3 className="health-card-title">{t('dashboard.todaysNutrition')}</h3>
+        <h3 className="health-card-title">Nutrition d'aujourd'hui</h3>
         <Button size="sm" variant="outline" className="h-8" onClick={handleAddFood}>
-          <Plus className="h-4 w-4 mr-1" /> {t('dashboard.addFood')}
+          <Plus className="h-4 w-4 mr-1" /> Ajouter nourriture
         </Button>
       </div>
       
@@ -92,7 +93,7 @@ const CalorieTracker = () => {
           <div className="space-y-2">
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted-foreground">{t('dashboard.protein')}</span>
+                <span className="text-muted-foreground">Protéines</span>
                 <span>{Math.round(macros.protein)}g</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -105,7 +106,7 @@ const CalorieTracker = () => {
             
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted-foreground">{t('dashboard.carbs')}</span>
+                <span className="text-muted-foreground">Glucides</span>
                 <span>{Math.round(macros.carbs)}g</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
@@ -118,13 +119,13 @@ const CalorieTracker = () => {
             
             <div>
               <div className="flex justify-between text-sm mb-1">
-                <span className="text-muted-foreground">{t('dashboard.fat')}</span>
-                <span>{Math.round(macros.fat)}g</span>
+                <span className="text-muted-foreground">Lipides</span>
+                <span>{Math.round(macros.fats)}g</span>
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-yellow-500 rounded-full" 
-                  style={{ width: `${Math.min(100, (macros.fat / (goalCalories * 0.25 / 9)) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (macros.fats / ((goalCalories * 0.25) / 9)) * 100)}%` }}
                 ></div>
               </div>
             </div>

@@ -51,24 +51,25 @@ $goalWeight = $data['goalWeight'];
 $currentWeight = $data['currentWeight'];
 $height = $data['height'];
 $gender = $data['gender'];
+$goalCalories = $data['goalCalories'];
 $activityLevel = $data['activityLevel'];
 $verification_code = rand(100000, 999999);
 $is_verified = 0;
 
 
 $stmt = $conn->prepare("
-    INSERT INTO users (name, email, password, birthdate, goalWeight, currentWeight, height, gender, activityLevel, verification_code, is_verified)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO users (name, email, password, birthdate, goalCalories, goalWeight, currentWeight, height, gender, activityLevel, verification_code, is_verified)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ");
 
-$stmt->bind_param("ssssiissssi", $name, $email, $password, $birthdate, $goalWeight, $currentWeight, $height, $gender, $activityLevel, $verification_code, $is_verified);
+$stmt->bind_param("ssssiiiissii", $name, $email, $password, $birthdate, $goalCalories, $goalWeight, $currentWeight, $height, $gender, $activityLevel, $verification_code, $is_verified);
 
 if ($stmt->execute()) {
     $stmt->close();
 
     $mail = new PHPMailer(true);
 
-    try {
+    try {-
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;

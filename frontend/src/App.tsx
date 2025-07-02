@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +23,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminPage from "./pages/Admin";
 import NotificationsPage from "./pages/Notifications";
 import SpecialistPage from "./pages/Specialist";
+import Accueil from "./pages/Accueil";
 
 const queryClient = new QueryClient();
 
@@ -34,8 +36,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Redirect root to login */}
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              {/* Redirect root to accueil */}
+              <Route path="/" element={<Accueil />} />
               
               {/* Auth Routes */}
               <Route path="/login" element={<Login />} />

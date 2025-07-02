@@ -1,5 +1,4 @@
 
-
 import { useHealth } from '@/contexts/HealthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
@@ -20,18 +19,23 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 const WeightTracker = () => {
-  const { weightEntries, user } = useHealth();
+  const { weightEntries, user, isLoading } = useHealth();
+  if (isLoading || !user) {
+    return <div>Chargement des données...</div>;
+  }
   
   // Sort entries by date
   const sortedEntries = [...weightEntries].sort((a, b) => 
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
   
+
   // Get first and last entry to calculate overall change
   const firstEntry = sortedEntries[0]?.weight;
   const lastEntry = sortedEntries[sortedEntries.length - 1]?.weight;
   const weightChange = lastEntry && firstEntry ? (lastEntry - firstEntry).toFixed(1) : '0';
   const isWeightLoss = Number(weightChange) < 0;
+  
   
   // Calculate min and max for y-axis
   const weights = sortedEntries.map(entry => entry.weight);

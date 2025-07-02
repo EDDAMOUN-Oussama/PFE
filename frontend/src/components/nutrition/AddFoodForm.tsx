@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,13 +8,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useHealth } from '@/contexts/HealthContext';
 import { useToast } from '@/hooks/use-toast';
 
+function calculateCalories(protein: number = 0, carbs: number = 0, fats: number = 0): number {
+  const caloriesFromProtein = protein * 4;
+  const caloriesFromCarbs = carbs * 4;
+  const caloriesFromFats = fats * 9;
+  return caloriesFromProtein + caloriesFromCarbs + caloriesFromFats;
+}
+
 const AddFoodForm = () => {
   const [foodName, setFoodName] = useState('');
   const [mealType, setMealType] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
-  const [fat, setFat] = useState('');
+  const [fats, setFats] = useState('');
 
   const { addFoodEntry } = useHealth();
   const { toast } = useToast();
@@ -35,9 +42,9 @@ const AddFoodForm = () => {
       name: foodName,
       mealType,
       calories: parseInt(calories),
-      protein: protein ? parseInt(protein) : undefined,
-      carbs: carbs ? parseInt(carbs) : undefined,
-      fat: fat ? parseInt(fat) : undefined,
+      protein: protein ? parseInt(protein) : 0,
+      carbs: carbs ? parseInt(carbs) : 0,
+      fats: fats ? parseInt(fats) : 0,
       date: new Date().toISOString(),
     };
 
@@ -49,14 +56,19 @@ const AddFoodForm = () => {
     setCalories('');
     setProtein('');
     setCarbs('');
-    setFat('');
+    setFats('');
 
-    toast({
-      title: "Aliment ajouté",
-      description: `${foodName} a été ajouté à votre journal alimentaire.`,
-    });
   };
 
+  useEffect(() => {
+    const p = Number(protein) || 0;
+    const c = Number(carbs) || 0;
+    const f = Number(fats) || 0;
+    const total = calculateCalories(p, c, f);
+    setCalories(total.toString());
+  }, [protein, carbs, fats]);
+
+  
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -132,12 +144,12 @@ const AddFoodForm = () => {
             </div>
             
             <div>
-              <Label htmlFor="fat">Lipides (g)</Label>
+              <Label htmlFor="fats">Lipides (g)</Label>
               <Input
-                id="fat"
+                id="fats"
                 type="number"
-                value={fat}
-                onChange={(e) => setFat(e.target.value)}
+                value={fats}
+                onChange={(e) => setFats(e.target.value)}
                 placeholder="g"
                 min="0"
               />

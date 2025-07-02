@@ -40,11 +40,36 @@ export const ChangePasswordForm = ({ open, onOpenChange }: ChangePasswordFormPro
     },
   });
 
-  const onSubmit = (data: ChangePasswordFormData) => {
+  const onSubmit = async (data: ChangePasswordFormData) => {
     console.log('Changement de mot de passe:', data);
-    toast.success('Mot de passe modifié avec succès');
-    form.reset();
-    onOpenChange(false);
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      toast.error("Utilisateur non trouvé.");
+      return;
+    }
+    try {
+    const response = await fetch('http://localhost/pfe/backend/controllers/updatePassword.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userId,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      }),
+    });
+    const result = await response.json();
+    if (result.success) {
+      toast.success('Mot de passe modifié avec succès');
+      form.reset();
+      onOpenChange(false);
+    } else {
+      toast.error(result.message || 'Échec du changement de mot de passe');
+    }} catch (error) {
+      console.error('Erreur lors du changement de mot de passe:', error);
+      toast.error('Une erreur s\'est produite lors du changement de mot de passe');
+    }
   };
 
   return (

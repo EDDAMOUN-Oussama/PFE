@@ -1,24 +1,34 @@
 
-import { HealthProvider } from '@/contexts/HealthContext';
+import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BellRing, Smartphone, Lock, UserCog } from 'lucide-react';
+import { BellRing, Smartphone, Lock, UserCog, Loader2 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
-import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 import { EditProfileForm } from '@/components/profile/EditProfileForm';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Stethoscope, CheckCircle } from 'lucide-react';
+import DeleteAccountSection from '@/components/settings/DeleteAccountSection';
+
 
 const SettingsPageContent = () => {
+  const [showSpecialistRequest, setShowSpecialistRequest] = useState(false);
+  const { user, isLoading, refetchUser } = useHealth();
   const { t } = useI18n();
   const [isMobile, setIsMobile] = useState(false);
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
-  const [showEditProfileForm, setShowEditProfileForm] = useState(false);
+  const [showEditProfile, setShowEditProfile] = useState(false);
+
+  const handleSpecialistRequest = () => {
+    setShowSpecialistRequest(true);
+    toast.success('Demande de spécialiste envoyée avec succès');
+  };
 
   useEffect(() => {
     const checkIfMobile = () => setIsMobile(window.innerWidth < 768);
@@ -27,79 +37,49 @@ const SettingsPageContent = () => {
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="flex-1 ml-64 flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex-1 ml-64 flex items-center justify-center h-screen">
+        <p className="text-red-500">Erreur : Impossible de charger les données.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64">
-      <div className="container p-4 md:p-6">
+    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64 h-screen </div>overflow-auto">
+      <div className="container p-4 md:p-6 h-full">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold">{t('settings.title')}</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Paramètres</h1>
           <ThemeToggle />
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="lg:col-span-2 space-y-4 md:space-y-6">
-            {/* Notifications Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BellRing className="mr-2 h-5 w-5 text-primary" />
-                  {t('settings.notifications')}
-                </CardTitle>
-                <CardDescription>{t('settings.notificationsDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="email-notifications">{t('settings.emailNotifications')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.emailNotificationsDesc')}
-                      </p>
-                    </div>
-                    <Switch id="email-notifications" defaultChecked />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="push-notifications">{t('settings.pushNotifications')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.pushNotificationsDesc')}
-                      </p>
-                    </div>
-                    <Switch id="push-notifications" defaultChecked />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="reminder-notifications">{t('settings.dailyReminders')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.dailyRemindersDesc')}
-                      </p>
-                    </div>
-                    <Switch id="reminder-notifications" defaultChecked />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full pb-6">
+          <div className="lg:col-span-3 space-y-4 md:space-y-6">
             {/* Account Settings Card */}
-            <Card>
+            <Card className="h-fit">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <UserCog className="mr-2 h-5 w-5 text-primary" />
-                  {t('settings.accountSettings')}
+                  Paramètres du compte
                 </CardTitle>
-                <CardDescription>{t('settings.accountSettingsDesc')}</CardDescription>
+                <CardDescription>Gérez les préférences de votre compte</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
                     <div>
-                      <h3 className="font-medium">{t('settings.changePassword')}</h3>
-                      <p className="text-sm text-muted-foreground">{t('settings.changePasswordDesc')}</p>
+                      <h3 className="font-medium">Changer le mot de passe</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Mettez à jour le mot de passe de votre compte
+                      </p>
                     </div>
                     <Button 
                       variant="outline" 
@@ -112,86 +92,54 @@ const SettingsPageContent = () => {
                   
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
                     <div>
-                      <h3 className="font-medium">{t('settings.emailAddress')}</h3>
-                      <p className="text-sm text-muted-foreground">john@example.com</p>
+                      <h3 className="font-medium">Adresse email</h3>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     <Button 
                       variant="outline" 
                       className="mt-2 md:mt-0"
-                      onClick={() => setShowEditProfileForm(true)}
+                      onClick={() => setShowEditProfile(true)}
                     >
-                      {t('button.change')}
+                      Changer
                     </Button>
                   </div>
-                  
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <h3 className="font-medium">{t('settings.deleteAccount')}</h3>
-                      <p className="text-sm text-muted-foreground">{t('settings.deleteAccountDesc')}</p>
-                    </div>
-                    <Button variant="destructive" className="mt-2 md:mt-0">{t('button.delete')}</Button>
-                  </div>
+
+                    <DeleteAccountSection />
                 </div>
               </CardContent>
             </Card>
-            
-            {/* Privacy Card */}
-            <Card>
+
+            {/* Specialist Request Card */}
+            <Card className="h-fit">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Lock className="mr-2 h-5 w-5 text-primary" />
-                  {t('settings.privacy')}
+                  <Stethoscope className="mr-2 h-5 w-5 text-primary" />
+                  Devenir Spécialiste
                 </CardTitle>
-                <CardDescription>{t('settings.privacyDesc')}</CardDescription>
+                <CardDescription>
+                  Demandez à devenir un spécialiste de santé vérifié
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="data-sharing">{t('settings.dataSharing')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.dataSharingDesc')}
-                      </p>
-                    </div>
-                    <Switch id="data-sharing" defaultChecked />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="two-factor-auth">{t('settings.twoFactorAuth')}</Label>
-                      <p className="text-sm text-muted-foreground">
-                        {t('settings.twoFactorAuthDesc')}
-                      </p>
-                    </div>
-                    <Switch id="two-factor-auth" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="space-y-4 md:space-y-6">
-            <AppearanceSettings />
-            
-            {/* Connected Devices Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Smartphone className="mr-2 h-5 w-5 text-primary" />
-                  {t('settings.connectedDevices')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {t('settings.connectedDevicesDesc')}
-                  </p>
-                  <Button variant="outline" className="w-full">
-                    {t('settings.connectDevice')}
+                {!showSpecialistRequest ? (
+                  <Button 
+                    variant="default" 
+                    className="w-full flex items-center justify-center"
+                    onClick={handleSpecialistRequest}
+                  >
+                    <Stethoscope className="h-4 w-4 mr-2" />
+                    Faire une demande pour devenir spécialiste
                   </Button>
-                </div>
+                ) : (
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                    <div className="flex items-center">
+                      <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                      <span className="text-sm text-green-800">
+                        Demande de spécialiste en cours de traitement
+                      </span>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -204,8 +152,10 @@ const SettingsPageContent = () => {
       />
       
       <EditProfileForm 
-        open={showEditProfileForm} 
-        onOpenChange={setShowEditProfileForm} 
+        user={user}
+        open={showEditProfile} 
+        onOpenChange={setShowEditProfile} 
+        refetchUser={refetchUser}
       />
     </div>
   );

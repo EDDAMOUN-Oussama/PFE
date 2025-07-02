@@ -1,4 +1,5 @@
 
+import { useEffect } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,25 +26,55 @@ import { toast } from "sonner";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Le nom doit contenir au moins 2 caractères." }),
-  type: z.enum(["cardio", "strength", "flexibility", "sports", "other"], {
+  type: z.enum(["cardio", "Musculation", "Flexibilité", "sports", "Autre"], {
     errorMap: () => ({ message: "Veuillez sélectionner un type d'exercice." }),
   }),
   duration: z.coerce.number().min(1, { message: "La durée doit être d'au moins 1 minute." }),
-  caloriesBurned: z.coerce.number().min(1, { message: "Les calories doivent être d'au moins 1." }),
+  caloriesBurned: z.coerce.number().min(0, { message: "Les calories doivent être d'au moins 1." }),
 });
 
+const MET_VALUES: Record<string, number> = {
+  cardio: 7,     
+  Musculation: 6,
+  Flexibilité: 3,
+  sports: 8,     
+  Autre: 5,      
+};
+
+function calculateCaloriesBurned(
+  type: string,
+  duration: number,
+  weightKg: number
+): number {
+  const met = MET_VALUES[type] || 5;
+  const durationHours = duration / 60;
+  return Math.round(met * weightKg * durationHours);
+};
+
+
 export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
-  const { addExerciseEntry } = useHealth();
+  const { addExerciseEntry, user } = useHealth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       type: "cardio",
-      duration: 0,
+      duration: 30,
       caloriesBurned: 0,
     },
   });
+
+  const watchType = form.watch('type');
+  const watchDuration = form.watch('duration');
+
+  useEffect(() => {
+    if (user && watchType && watchDuration > 0) {
+      const calculated = calculateCaloriesBurned(watchType, watchDuration, user.currentWeight);
+      form.setValue('caloriesBurned', calculated, { shouldValidate: true });
+    }
+  }, [watchType, watchDuration, user]);
+
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     addExerciseEntry({
@@ -53,7 +84,6 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
       caloriesBurned: values.caloriesBurned,
       date: new Date().toISOString(),
     });
-    toast.success("Exercice ajouté avec succès !");
     form.reset();
     if (onFinished) {
       onFinished();
@@ -96,10 +126,10 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="cardio">Cardio</SelectItem>
-                      <SelectItem value="strength">Musculation</SelectItem>
-                      <SelectItem value="flexibility">Flexibilité</SelectItem>
+                      <SelectItem value="Musculation">Musculation</SelectItem>
+                      <SelectItem value="Flexibilité">Flexibilité</SelectItem>
                       <SelectItem value="sports">Sports</SelectItem>
-                      <SelectItem value="other">Autre</SelectItem>
+                      <SelectItem value="Autre">Autre</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -127,7 +157,7 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
                   <FormItem>
                     <FormLabel>Calories brûlées</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="300" {...field} />
+                      <Input type="number"  {...field} min={1} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
