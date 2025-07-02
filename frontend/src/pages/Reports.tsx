@@ -82,21 +82,25 @@ const ReportsPageContent = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <LineChart className="mr-2 h-5 w-5 text-primary" />
-                Évolution du Poids
+          <LineChart className="mr-2 h-5 w-5 text-primary" />
+          Évolution du Poids
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ReLineChart data={weightData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[80, 85]} />
-                    <Tooltip formatter={(value) => [`${value} kg`, 'Poids']} />
-                    <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
-                  </ReLineChart>
-                </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <ReLineChart data={weightData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis 
+                dataKey="name" 
+                interval={Math.ceil((weightData.length - 1) / 4)}
+                tick={{ fontSize: 12 }}
+              />
+              <YAxis domain={[80, 85]} />
+              <Tooltip formatter={(value) => [`${value} kg`, 'Poids']} />
+              <Line type="monotone" dataKey="weight" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} />
+            </ReLineChart>
+          </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>

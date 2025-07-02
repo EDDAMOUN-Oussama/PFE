@@ -237,7 +237,7 @@ export default function Register() {
               <FormItem>
                 <FormLabel>Nom complet</FormLabel>
                 <FormControl>
-                  <Input placeholder="NOM Prenom" {...field} />
+                  <Input placeholder="Nom Prenom" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

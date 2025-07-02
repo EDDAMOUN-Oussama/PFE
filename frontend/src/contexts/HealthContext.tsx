@@ -20,7 +20,8 @@ interface DailyStats {
 interface User {
   id: string; name: string; email: string; currentWeight: number; goalWeight: number;
   height: number; birthdate: string; gender: string; activityLevel: string;
-  goalCalories?: number; memberSince?: string;
+  goalCalories?: number; memberSince?: string;   role: 'user' | 'admin' | 'specialist';
+  specialist_request_status?: 'pending' | 'approved' | 'rejected';
 }
 interface HealthContextType {
   goals: Goal[];
@@ -485,4 +486,3 @@ export const useHealth = () => {
   }
   return context;
 };
-

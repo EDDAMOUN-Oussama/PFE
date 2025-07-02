@@ -14,6 +14,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { Stethoscope, CheckCircle } from 'lucide-react';
+import DeleteAccountSection from '@/components/settings/DeleteAccountSection';
+
 
 const SettingsPageContent = () => {
   const [showSpecialistRequest, setShowSpecialistRequest] = useState(false);
@@ -52,7 +54,7 @@ const SettingsPageContent = () => {
   }
 
   return (
-    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64 h-screen overflow-auto">
+    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64 h-screen </div>overflow-auto">
       <div className="container p-4 md:p-6 h-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Paramètres</h1>
@@ -61,44 +63,6 @@ const SettingsPageContent = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full pb-6">
           <div className="lg:col-span-3 space-y-4 md:space-y-6">
-            {/* Notifications Card */}
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <BellRing className="mr-2 h-5 w-5 text-primary" />
-                  Notifications
-                </CardTitle>
-                <CardDescription>
-                  Configurez comment vous recevez les notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="email-notifications">Notifications par email</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Recevez des emails sur votre activité et vos progrès
-                      </p>
-                    </div>
-                    <Switch id="email-notifications" defaultChecked />
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="push-notifications">Notifications push</Label>
-                      <p className="text-sm text-muted-foreground">
-                        Recevez des notifications directement sur votre appareil
-                      </p>
-                    </div>
-                    <Switch id="push-notifications" defaultChecked />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-            
             {/* Account Settings Card */}
             <Card className="h-fit">
               <CardHeader>
@@ -139,18 +103,8 @@ const SettingsPageContent = () => {
                       Changer
                     </Button>
                   </div>
-                  
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                    <div>
-                      <h3 className="font-medium">Supprimer le compte</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Supprimez définitivement votre compte et toutes les données
-                      </p>
-                    </div>
-                    <Button variant="destructive" className="mt-2 md:mt-0">
-                      Supprimer
-                    </Button>
-                  </div>
+
+                    <DeleteAccountSection />
                 </div>
               </CardContent>
             </Card>

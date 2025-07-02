@@ -16,8 +16,6 @@ const CalorieTracker = () => {
   const goalCalories = user.goalCalories || 2000;
   const remainingCalories = Math.max(0, goalCalories - dailyStats.caloriesConsumed);
   
-  // Data for pie chart
-  console.log("caloriesConsumed:", dailyStats.caloriesConsumed);
   const data = [
     { name: t('dashboard.consumed'), value: dailyStats.caloriesConsumed, color: '#0ea5e9' },
     { name: t('dashboard.remaining'), value: remainingCalories, color: '#e4e4e7' },

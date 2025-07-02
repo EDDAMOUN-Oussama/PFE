@@ -42,6 +42,7 @@ $stmt->bind_param("ii", $data->weight, $data->userId);
 if (!$stmt->execute()) {
     http_response_code(503); 
     echo json_encode(["success" => false, "message" => "Impossible de mettre à jour le poids actuel."]);
+    exit();
 }
 
 $inputDate = $data->date;
@@ -103,5 +104,4 @@ $stmt->close();
 
 http_response_code(200);
 echo json_encode(["success" => true, "message" => "Poids actuel mis à jour avec succès."]);
-$stmt->close();
 $db->close();

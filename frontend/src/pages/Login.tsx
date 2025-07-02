@@ -88,7 +88,7 @@ export default function Login() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>{t('auth.password')}</FormLabel>
+                <FormLabel>Mot de passe</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
