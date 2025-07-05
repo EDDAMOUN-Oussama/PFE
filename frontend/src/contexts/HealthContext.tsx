@@ -10,7 +10,7 @@ interface ExerciseEntry {
   id: string; name: string; type: string; duration: number; caloriesBurned: number; date: string;
 }
 interface FoodEntry {
-  id: string; name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string;
+  id: string; name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string;
 }
 interface WeightEntry { id: string; weight: number; date: string; }
 interface DailyStats {
@@ -37,7 +37,7 @@ interface HealthContextType {
   deleteGoal: (goalId: string) => Promise<void>;
   refetchUser: () => Promise<void>;
   addWeightEntry: (weightEntry: { weight: number; date: string }) => Promise<void>;
-  addFoodEntry: (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => Promise<void>;
+  addFoodEntry: (foodEntry: { name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => Promise<void>;
   addExerciseEntry: (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string }) => Promise<void>;
   updateDailyStats: (stats: DailyStats) => Promise<void>;
   fetchDailyStats: () => Promise<void>;
@@ -100,6 +100,14 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     }
     const date = new Date().toISOString().split('T')[0];
     try {
+      console.log("Mise à jour des statistiques journalières:", {
+        userId,
+        date,
+        caloriesConsumed: stats.caloriesConsumed,
+        caloriesBurned: stats.caloriesBurned,
+        weight: stats.currentWeight,
+        exerciseMinutes: stats.exerciseMinutes,
+      });
       const response = await fetch(`http://localhost/pfe/backend/controllers/updateDailyStats.php`,
         {
           method: "POST",
@@ -124,8 +132,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error("Erreur de connexion lors de la mise à jour des statistiques journalières:",
         error);
-      toast.error("Erreur de connexion lors de la mise à jour des statistiques journalières.");
-    }
+   }
   };
   
 
@@ -380,7 +387,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       });
       const result = await response.json();
       if (result.success) {
-        const newEntry = { id: result.id.toString(), ...weightEntry };
+        const newEntry = { id: result.id, ...weightEntry };
         toast.success(`Poids ajouté: ${weightEntry.weight} kg le ${weightEntry.date}`);
         setWeightEntries(prev => [...prev, { id: Date.now().toString(), ...weightEntry }]);
         await loadUser();
@@ -399,7 +406,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addFoodEntry = async (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => {
+  const addFoodEntry = async (foodEntry: { name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => {
     try {
       const userId = user?.id;
       const response = await fetch('http://localhost/pfe/backend/controllers/addFoodEntry.php', {

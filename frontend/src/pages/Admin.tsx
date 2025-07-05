@@ -62,11 +62,11 @@ const AdminPageContent = () => {
 
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="specialists">Demandes Spécialistes ({requests.length})</TabsTrigger>
+            {/* <TabsTrigger value="overview">Vue d'ensemble</TabsTrigger> */}
           </TabsList>
 
-          <TabsContent value="overview">{/* ... Contenu de la vue d'ensemble ... */}</TabsContent>
+          {/* <TabsContent value="overview">... Contenu de la vue d'ensemble ...</TabsContent> */}
 
           <TabsContent value="specialists" className="space-y-4">
             <Card>

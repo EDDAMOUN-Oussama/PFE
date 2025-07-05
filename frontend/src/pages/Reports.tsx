@@ -57,14 +57,20 @@ const ReportsPageContent = () => {
 
 
   if (!user) {
+    {console.log('User not found, redirecting to login');}
     return <div className="flex items-center justify-center h-screen">Veuillez vous connecter pour accéder aux rapports.</div>;
   }
   if (weightData.length === 0 || calorieData.length === 0 || macroData.length === 0) {
-    return <div className="flex items-center justify-center h-screen">Chargement des données...</div>;
+    {console.log('Data is still loading or empty');}
+    return <div className="flex items-center justify-center h-screen">         Chargement des données...</div>;
   }
   if (weightData.length === 0 && calorieData.length === 0 && macroData.length === 0) {
+    {console.log('No data available');}
     return <div className="flex items-center justify-center h-screen">Aucune donnée disponible pour l'instant.</div>;
   }
+  else {
+  {console.log('Rendering reports page with data');}
+  
 
 
   return (
@@ -207,6 +213,7 @@ const ReportsPageContent = () => {
       </div>
     </div>
   );
+};
 };
 
 const ReportsPage = () => {

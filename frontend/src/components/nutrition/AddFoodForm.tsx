@@ -17,7 +17,7 @@ function calculateCalories(protein: number = 0, carbs: number = 0, fats: number 
 
 const AddFoodForm = () => {
   const [foodName, setFoodName] = useState('');
-  const [mealType, setMealType] = useState('');
+  const [maleType, setmaleType] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
   const [carbs, setCarbs] = useState('');
@@ -29,7 +29,7 @@ const AddFoodForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!foodName || !mealType || !calories) {
+    if (!foodName || !maleType || !calories) {
       toast({
         title: "Erreur",
         description: "Veuillez remplir tous les champs obligatoires.",
@@ -40,7 +40,7 @@ const AddFoodForm = () => {
 
     const newFoodEntry = {
       name: foodName,
-      mealType,
+      maleType,
       calories: parseInt(calories),
       protein: protein ? parseInt(protein) : 0,
       carbs: carbs ? parseInt(carbs) : 0,
@@ -52,7 +52,7 @@ const AddFoodForm = () => {
     
     // Reset form
     setFoodName('');
-    setMealType('');
+    setmaleType('');
     setCalories('');
     setProtein('');
     setCarbs('');
@@ -90,8 +90,8 @@ const AddFoodForm = () => {
             </div>
             
             <div>
-              <Label htmlFor="mealType">Type de repas *</Label>
-              <Select value={mealType} onValueChange={setMealType} required>
+              <Label htmlFor="maleType">Type de repas *</Label>
+              <Select value={maleType} onValueChange={setmaleType} required>
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner un repas" />
                 </SelectTrigger>

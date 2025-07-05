@@ -58,16 +58,6 @@ const NotificationsPageContent = () => {
       timeUnit: t('notifications.hoursAgo'),
       isRead: true,
       priority: 'low'
-    },
-    {
-      id: '4',
-      type: 'exercise_reminder',
-      title: t('notifications.yogaSession'),
-      message: t('notifications.yogaSessionDesc'),
-      time: '1',
-      timeUnit: t('notifications.dayAgo'),
-      isRead: true,
-      priority: 'medium'
     }
   ];
 

@@ -17,7 +17,7 @@ const SpecialistPage = () => {
   const pendingQuestions = [
     {
       id: 1,
-      patientName: "Marie Dubois",
+      patientName: "AHMED BEN SAID",
       patientAge: 28,
       question: "J'ai des douleurs abdominales depuis 3 jours. Que dois-je faire ?",
       timestamp: "2025-01-15 14:30",
@@ -26,7 +26,7 @@ const SpecialistPage = () => {
     },
     {
       id: 2,
-      patientName: "Pierre Martin",
+      patientName: "Fatima Ben Mohamed",
       patientAge: 45,
       question: "Mon taux de cholestérol est élevé (2.8g/L). Dois-je modifier mon alimentation ?",
       timestamp: "2025-01-15 12:15",
@@ -35,7 +35,7 @@ const SpecialistPage = () => {
     },
     {
       id: 3,
-      patientName: "Sophie Lefèvre",
+      patientName: "Mariam ALI",
       patientAge: 35,
       question: "Enceinte de 8 mois, j'ai des contractions irrégulières. Est-ce normal ?",
       timestamp: "2025-01-15 16:45",
@@ -47,7 +47,7 @@ const SpecialistPage = () => {
   const respondedQuestions = [
     {
       id: 4,
-      patientName: "Jean Dupont",
+      patientName: "Mohamed BEN AHMED",
       patientAge: 52,
       question: "Comment réduire ma tension artérielle naturellement ?",
       response: "Je recommande une alimentation pauvre en sel, de l'exercice régulier (30min/jour), et un suivi médical. Consultez votre médecin traitant pour un ajustement éventuel du traitement.",

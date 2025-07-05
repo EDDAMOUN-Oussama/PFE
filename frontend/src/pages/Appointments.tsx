@@ -20,8 +20,8 @@ const AppointmentsPageContent = () => {
       id: '1',
       type: 'consultation',
       title: t('appointments.doctorConsultation'),
-      doctor: 'Dr. Martin Dubois',
-      date: '2025-06-15',
+      doctor: 'Dr. Ahmed Mohamed',
+      date: '2025-07-15',
       time: '14:30',
       status: 'confirmed'
     },
@@ -29,8 +29,8 @@ const AppointmentsPageContent = () => {
       id: '2',
       type: 'nutrition',
       title: t('appointments.nutritionistConsult'),
-      doctor: 'Marie Lefebvre',
-      date: '2025-06-18',
+      doctor: 'Dr. Sarah Mohamed',
+      date: '2025-07-18',
       time: '10:00',
       status: 'pending'
     },
@@ -39,7 +39,7 @@ const AppointmentsPageContent = () => {
       type: 'test',
       title: t('appointments.bloodTest'),
       doctor: 'Laboratoire Central',
-      date: '2025-06-20',
+      date: '2025-07-20',
       time: '08:15',
       status: 'confirmed'
     }

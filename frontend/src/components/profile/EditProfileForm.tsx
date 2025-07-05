@@ -187,10 +187,10 @@ export const EditProfileForm = ({ user, open, onOpenChange, refetchUser }) => {
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
       calculatedAge--;
     }
-    return calculatedAge;
+    return calculatedAge.toString();
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
     if (id === 'birthdate') {
