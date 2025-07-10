@@ -35,9 +35,10 @@ $result = $stmt->get_result();
 if ($result->num_rows === 1) {
     $row = $result->fetch_assoc();
 
-    if ($row['is_verified'] == 1) {
-        echo json_encode(['success' => false, 'message' => 'Compte déjà vérifié']);
-    } elseif ($row['verification_code'] === $code) {
+    // if ($row['is_verified'] >= 1) {
+    //     echo json_encode(['success' => false, 'message' => 'Compte déjà vérifié']);
+    // } else
+    if ($row['verification_code'] === $code) {
         $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
         $updateSql = "UPDATE users SET is_verified = 1, password = ? WHERE email = ?";
         $updateStmt = $conn->prepare($updateSql);

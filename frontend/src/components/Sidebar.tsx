@@ -100,6 +100,11 @@ const Sidebar = () => {
         {isLoading ? (
           <div className="h-10 w-full flex items-center justify-center">{/* Placeholder de chargement */}</div>
         ) : user ? (
+          <button
+            onClick={() => navigate('/profile')}
+            className={`flex items-center mb-4 ${collapsed ? 'justify-center' : ''} cursor-pointer`}
+            title={collapsed ? "Voir le profil" : undefined}
+            >
           <div className={`flex items-center ${collapsed ? 'justify-center' : ''}`}>
             <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center text-sm font-bold flex-shrink-0">
               {getInitials(user.name)}
@@ -111,6 +116,7 @@ const Sidebar = () => {
               </div>
             )}
           </div>
+          </button>
         ) : (
           <div className="h-10">{/* Vide si pas d'utilisateur ou erreur */}</div>
         )}

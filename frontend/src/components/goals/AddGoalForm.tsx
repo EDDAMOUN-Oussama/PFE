@@ -50,10 +50,11 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     const progress = values.target > 0 ? Math.min((values.currentValue / values.target) * 100, 100) : 0;
-    if (values.type === "weight" && values.currentValue > values.target) {
-      toast.error("La valeur actuelle ne peut pas être inférieure ou égale à la cible pour un objectif de poids.");
-      return;
-    } else if (values.type === "calories" && values.currentValue > values.target) {
+    // if (values.type === "weight" && values.currentValue > values.target) {
+    //   toast.error("La valeur actuelle ne peut pas être inférieure ou égale à la cible pour un objectif de poids.");
+    //   return;
+    // } else
+     if (values.type === "calories" && values.currentValue > values.target) {
       toast.error("La valeur actuelle ne peut pas être supérieure à la cible pour un objectif de calories.");
       return;
     } else if (values.type === "exercise" && values.currentValue > values.target) {
