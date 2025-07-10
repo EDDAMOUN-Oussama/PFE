@@ -24,15 +24,25 @@ Follow these steps:
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+git clone <YOUR_GIT_URL> //in a C:\wamp64\www with wampp
 
 # Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Step 3:Navigate to the backend directory.
+cd backend
+
+#step 4: insttal phpMailer and tcpdf
+composer require phpmailer/phpmailer
+composer require tecnickcom/tcpdf
+
+# Step 5: Navigate to the frontend directory.
+cd ../frontend
+
+# Step 6: Install the necessary dependencies.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 7: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
