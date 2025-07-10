@@ -20,8 +20,6 @@ import {
 } from 'recharts';
 
 
-
-
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
 const ReportsPageContent = () => {
@@ -57,14 +55,20 @@ const ReportsPageContent = () => {
 
 
   if (!user) {
+    {console.log('User not found, redirecting to login');}
     return <div className="flex items-center justify-center h-screen">Veuillez vous connecter pour accéder aux rapports.</div>;
   }
   if (weightData.length === 0 || calorieData.length === 0 || macroData.length === 0) {
-    return <div className="flex items-center justify-center h-screen">Chargement des données...</div>;
+    {console.log('Data is still loading or empty');}
+    return <div className="flex items-center justify-center h-screen">         Chargement des données...</div>;
   }
   if (weightData.length === 0 && calorieData.length === 0 && macroData.length === 0) {
+    {console.log('No data available');}
     return <div className="flex items-center justify-center h-screen">Aucune donnée disponible pour l'instant.</div>;
   }
+  else {
+  {console.log('Rendering reports page with data');}
+  
 
 
   return (
@@ -105,27 +109,27 @@ const ReportsPageContent = () => {
             </CardContent>
           </Card>
           
-          <Card>
+            <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <BarChart className="mr-2 h-5 w-5 text-primary" />
-                Apport Calorique
+              <BarChart className="mr-2 h-5 w-5 text-primary" />
+              Apport Calorique
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ReBarChart data={calorieData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`${value} kcal`, 'Calories']} />
-                    <Bar dataKey="calories" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                  </ReBarChart>
-                </ResponsiveContainer>
+              <ResponsiveContainer width="100%" height="100%">
+                <ReBarChart data={calorieData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }} maxBarSize={60}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`${value} kcal`, 'Calories']} />
+                <Bar dataKey="calories" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                </ReBarChart>
+              </ResponsiveContainer>
               </div>
             </CardContent>
-          </Card>
+            </Card>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -207,6 +211,7 @@ const ReportsPageContent = () => {
       </div>
     </div>
   );
+};
 };
 
 const ReportsPage = () => {

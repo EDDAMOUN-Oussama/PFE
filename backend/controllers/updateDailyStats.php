@@ -29,6 +29,7 @@ $caloriesBurned   = isset($data->caloriesBurned)   ? (int)$data->caloriesBurned 
 $weight           = isset($data->weight)           ? (float)$data->weight         : 0;
 $exerciseMinutes  = isset($data->exerciseMinutes)  ? (int)$data->exerciseMinutes  : 0;
 
+$db = Database::connect();
 
 if (isset($data->weight) && $data->weight > 0) {
     $weight = (float)$data->weight;
@@ -39,10 +40,7 @@ if (isset($data->weight) && $data->weight > 0) {
     $stmt->execute();
     $userResult = $stmt->get_result();
     $weight = ($userRow = $userResult->fetch_assoc()) ? (float)$userRow['currentWeight'] : 0;
-    $stmt->close();
 }
-
-$db = Database::connect();
 
 $checkQuery = "SELECT * FROM DailyStats WHERE user_id = ? AND date = ?";
 $stmt = $db->prepare($checkQuery);

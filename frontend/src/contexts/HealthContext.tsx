@@ -10,7 +10,7 @@ interface ExerciseEntry {
   id: string; name: string; type: string; duration: number; caloriesBurned: number; date: string;
 }
 interface FoodEntry {
-  id: string; name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string;
+  id: string; name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string;
 }
 interface WeightEntry { id: string; weight: number; date: string; }
 interface DailyStats {
@@ -37,7 +37,7 @@ interface HealthContextType {
   deleteGoal: (goalId: string) => Promise<void>;
   refetchUser: () => Promise<void>;
   addWeightEntry: (weightEntry: { weight: number; date: string }) => Promise<void>;
-  addFoodEntry: (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => Promise<void>;
+  addFoodEntry: (foodEntry: { name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => Promise<void>;
   addExerciseEntry: (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string }) => Promise<void>;
   updateDailyStats: (stats: DailyStats) => Promise<void>;
   fetchDailyStats: () => Promise<void>;
@@ -91,42 +91,84 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     };
   };
 
-  const updateDailyStats = async (stats: DailyStats) => {
+
+  const updateDailyStats = async () => {
     const userId = localStorage.getItem('user_id');
-    if (!userId)
-    {
-        toast.error("Utilisateur non connecté");
-        return;
+    if (!userId) {
+      toast.error("Utilisateur non connecté");
+      return;
     }
     const date = new Date().toISOString().split('T')[0];
     try {
-      const response = await fetch(`http://localhost/pfe/backend/controllers/updateDailyStats.php`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId,
-            date,
-            caloriesConsumed: stats.caloriesConsumed,
-            caloriesBurned: stats.caloriesBurned,
-            weight: stats.currentWeight,
-            exerciseMinutes: stats.exerciseMinutes,
-          }),
-        }
-      );
+      const [foodRes, exerciseRes, weightRes] = await Promise.all([
+        fetch(`http://localhost/pfe/backend/controllers/getFoodEntries.php?user_id=${userId}`),
+        fetch(`http://localhost/pfe/backend/controllers/getExerciseEntries.php?user_id=${userId}`),
+        fetch(`http://localhost/pfe/backend/controllers/getWeightEntries.php?user_id=${userId}`)
+      ]);
+  
+      const foodData = await foodRes.json();
+      const exerciseData = await exerciseRes.json();
+      const weightData = await weightRes.json();
+  
+      if (!foodData.success || !exerciseData.success || !weightData.success) {
+        console.error("Échec du chargement des données pour calculer les statistiques");
+        return;
+      }
+  
+      const calculateDailyStats = (
+        foods: FoodEntry[],
+        exercises: ExerciseEntry[],
+        weight: WeightEntry[]
+      ): DailyStats => {
+        const today = new Date().toISOString().split('T')[0];
+  
+        const toDateOnly = (str: string) => new Date(str).toISOString().split('T')[0];
+  
+        const todayFoods = foods.filter(f => toDateOnly(f.date) === today);
+        const todayExercises = exercises.filter(e => toDateOnly(e.date) === today);
+        const currentWeight = weight.find(w => toDateOnly(w.date) === today)?.weight || 0;
+  
+        const caloriesConsumed = todayFoods.reduce((sum, f) => sum + f.calories, 0);
+        const caloriesBurned = todayExercises.reduce((sum, e) => sum + e.caloriesBurned, 0);
+        const netCalories = caloriesConsumed - caloriesBurned;
+        const exerciseMinutes = todayExercises.reduce((sum, e) => sum + e.duration, 0);
+  
+        return {
+          caloriesConsumed,
+          caloriesBurned,
+          netCalories,
+          exerciseMinutes,
+          currentWeight,
+        };
+      };
+  
+      const stats = calculateDailyStats(foodData.entries, exerciseData.entries, weightData.entries);
+  
+      const response = await fetch(`http://localhost/pfe/backend/controllers/updateDailyStats.php`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          date,
+          caloriesConsumed: stats.caloriesConsumed,
+          caloriesBurned: stats.caloriesBurned,
+          weight: stats.currentWeight,
+          exerciseMinutes: stats.exerciseMinutes,
+        }),
+      });
+  
       const result = await response.json();
       if (result.success) {
-        console.log("Statistiques journalières mises à jour avec succès");
-      }
-      else {
-        console.error("Erreur lors de la mise à jour des statistiques journalières:", result.message);
+        toast.success("Statistiques journalières mises à jour avec succès");
+      } else {
+        toast.error("Erreur lors de la mise à jour des statistiques: " + result.message);
       }
     } catch (error) {
-      console.error("Erreur de connexion lors de la mise à jour des statistiques journalières:",
-        error);
-      toast.error("Erreur de connexion lors de la mise à jour des statistiques journalières.");
+      console.error("Erreur de connexion lors de la mise à jour des statistiques journalières:", error);
+      toast.error("Erreur de connexion avec le serveur.");
     }
   };
+  
   
 
   const loadGoals = async () => {
@@ -209,18 +251,21 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   };
   
 
-  const loadFoodEntries = async (userId: string) => {
+  const loadFoodEntries = async (userId: string): Promise<FoodEntry[] | null> => {
     try {
       const res = await fetch(`http://localhost/pfe/backend/controllers/getFoodEntries.php?user_id=${userId}`);
       const data = await res.json();
       if (data.success) {
         setFoodEntries(data.entries);
-        setDailyStats(prev => calculateDailyStats(data.entries, exerciseEntries, weightEntries));
+        return data.entries; // ✅ ترجع البيانات فقط بدون حساب الـ stats
       }
     } catch (error) {
       console.error("Erreur lors du chargement des aliments:", error);
     }
+    return null;
   };
+  
+  
 
   const fetchWeightEntries = async (userId: string) => {
     try {
@@ -286,7 +331,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
         };
   
         setDailyStats(stats);
-        await updateDailyStats(stats);
+        await updateDailyStats();
       })
       .catch(err => console.error("Erreur chargement données:", err));
   
@@ -380,7 +425,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       });
       const result = await response.json();
       if (result.success) {
-        const newEntry = { id: result.id.toString(), ...weightEntry };
+        const newEntry = { id: result.id, ...weightEntry };
         toast.success(`Poids ajouté: ${weightEntry.weight} kg le ${weightEntry.date}`);
         setWeightEntries(prev => [...prev, { id: Date.now().toString(), ...weightEntry }]);
         await loadUser();
@@ -388,7 +433,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
         const stats = calculateDailyStats(foodEntries, exerciseEntries, [...weightEntries, newEntry
         ]);
         setDailyStats(stats);
-        await updateDailyStats(stats);
+        await updateDailyStats();
       }
       else {
         toast.error("Erreur lors de l'ajout de l'entrée de poids: " + result.message);
@@ -399,7 +444,15 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addFoodEntry = async (foodEntry: { name: string; mealType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string }) => {
+  const addFoodEntry = async (foodEntry: {
+    name: string;
+    maleType: string;
+    calories: number;
+    protein?: number;
+    carbs?: number;
+    fats?: number;
+    date: string;
+  }) => {
     try {
       const userId = user?.id;
       const response = await fetch('http://localhost/pfe/backend/controllers/addFoodEntry.php', {
@@ -407,18 +460,18 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...foodEntry }),
       });
-      console.log("Ajout d'un aliment:", { userId, ...foodEntry });
+  
       const result = await response.json();
       if (result.success) {
-        const updatedFoodEntries = [...foodEntries, { ...foodEntry, id: result.id }];
         toast.success(`Aliment ajouté: ${foodEntry.name} (${foodEntry.calories} cal)`);
-        await loadFoodEntries(userId!);
-        setFoodEntries(updatedFoodEntries);
-        const stats = calculateDailyStats(updatedFoodEntries, exerciseEntries, weightEntries);
-        setDailyStats(stats);
-        await updateDailyStats(stats);
-      }
-      else {
+  
+        const updatedFoods = await loadFoodEntries(userId!); // ✅ ننتظر البيانات
+        if (updatedFoods) {
+          const stats = calculateDailyStats(updatedFoods, exerciseEntries, weightEntries);
+          setDailyStats(stats);
+          await updateDailyStats();
+        }
+      } else {
         toast.error("Erreur lors de l'ajout d'un aliment: " + result.message);
       }
     } catch (error) {
@@ -426,6 +479,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       console.error("Erreur dans addFoodEntry:", error);
     }
   };
+  
 
   const addExerciseEntry = async (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string }) => {
     try {
@@ -443,7 +497,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
         await loadExerciseEntries(userId!);
         const stats = calculateDailyStats(foodEntries, updatedExerciseEntries, weightEntries);
         setDailyStats(stats);
-        await updateDailyStats(stats);
+        await updateDailyStats();
       }
       else {
         toast.error("Erreur lors de l'ajout d'un exercice: " + result.message);

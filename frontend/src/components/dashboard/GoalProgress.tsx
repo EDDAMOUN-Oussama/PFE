@@ -55,7 +55,7 @@ const GoalProgress = () => {
   return (
     <div className="health-card">
       <div className="health-card-header">
-        <h3 className="health-card-title">{t('dashboard.goalsProgress')}</h3>
+        <h3 className="health-card-title">Objectifs et Progrès</h3>
         <Target className="h-5 w-5 text-muted-foreground" />
       </div>
 

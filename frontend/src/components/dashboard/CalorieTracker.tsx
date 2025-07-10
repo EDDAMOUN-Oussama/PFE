@@ -141,7 +141,7 @@ const CalorieTracker = () => {
               <div key={entry.id} className="flex justify-between items-center py-2 border-b border-border">
                 <div>
                   <p className="font-medium">{entry.name}</p>
-                  <p className="text-sm text-muted-foreground capitalize">{entry.mealType}</p>
+                  <p className="text-sm text-muted-foreground capitalize">{entry.maleType}</p>
                 </div>
                 <p className="font-medium">{entry.calories} kcal</p>
               </div>

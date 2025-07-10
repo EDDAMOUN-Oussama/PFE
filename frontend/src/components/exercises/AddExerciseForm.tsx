@@ -53,7 +53,7 @@ function calculateCaloriesBurned(
 
 
 export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
-  const { addExerciseEntry, user } = useHealth();
+  const { addExerciseEntry, user, refetchUser } = useHealth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,6 +85,7 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
       date: new Date().toISOString(),
     });
     form.reset();
+    refetchUser(); // Re-fetch user data to update current weight
     if (onFinished) {
       onFinished();
     }

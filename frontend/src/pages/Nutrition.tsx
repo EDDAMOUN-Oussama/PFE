@@ -15,8 +15,8 @@ const NutritionPageContent = () => {
 
 const { foodEntries } = useHealth();
 
-const calculateMealData = (mealType: string) => {
-  const meals = foodEntries.filter(entry => entry.maleType === mealType);
+const calculateMealData = (maleType: string) => {
+  const meals = foodEntries.filter(entry => entry.maleType === maleType);
   const totalCalories = meals.reduce((sum, item) => sum + item.calories, 0);
   return {
     calories: totalCalories,

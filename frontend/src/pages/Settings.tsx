@@ -4,9 +4,6 @@ import { useI18n } from '@/contexts/I18nContext';
 import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BellRing, Smartphone, Lock, UserCog, Loader2 } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 import { EditProfileForm } from '@/components/profile/EditProfileForm';
@@ -24,10 +21,31 @@ const SettingsPageContent = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
   const [showEditProfile, setShowEditProfile] = useState(false);
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
-  const handleSpecialistRequest = () => {
-    setShowSpecialistRequest(true);
-    toast.success('Demande de spécialiste envoyée avec succès');
+  const handleSpecialistRequest = async () => {
+  if (!user) return;
+    setIsSubmittingRequest(true);
+    try {
+      const response = await fetch('http://localhost/pfe/backend/controllers/createSpecialistRequest.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id }),
+      });
+      const result = await response.json();
+      console.log(result);
+      if (result.success) {
+        toast.success('Demande envoyée avec succès !');
+        await refetchUser(); // On rafraîchit les données pour obtenir le nouveau statut
+      } else {
+        toast.error(`Erreur : ${result.message}`);
+      }
+    } catch (error) {
+      toast.error("Erreur de connexion.");
+    } finally {
+      setIsSubmittingRequest(false);
+      setShowSpecialistRequest(true); // On affiche le message de demande en cours
+    }
   };
 
   useEffect(() => {
@@ -45,13 +63,19 @@ const SettingsPageContent = () => {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="flex-1 ml-64 flex items-center justify-center h-screen">
-        <p className="text-red-500">Erreur : Impossible de charger les données.</p>
-      </div>
-    );
-  }
+ 
+  if (!user) {   return <div className="flex-1 ml-64 flex items-center justify-center h-screen"><p className="text-red-500">Erreur : Impossible de charger les données.</p></div>; }
+
+ const renderSpecialistCardContent =  () => {   
+    // await refetchUser();
+    console.log('User specialist request status:', user.specialist_request_status);
+    if (user.specialist_request_status === 'pending') {   
+      // Do not update state here!
+      return 1; 
+    } else {
+      return 0; 
+    }
+ };
 
   return (
     <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64 h-screen </div>overflow-auto">
@@ -103,12 +127,11 @@ const SettingsPageContent = () => {
                       Changer
                     </Button>
                   </div>
-
+              
                     <DeleteAccountSection />
                 </div>
               </CardContent>
             </Card>
-
             {/* Specialist Request Card */}
             <Card className="h-fit">
               <CardHeader>
@@ -121,7 +144,7 @@ const SettingsPageContent = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {!showSpecialistRequest ? (
+                { !renderSpecialistCardContent() && !showSpecialistRequest ? (
                   <Button 
                     variant="default" 
                     className="w-full flex items-center justify-center"

@@ -42,10 +42,9 @@ export default function ForgotPassword() {
               description: "Veuillez vérifier votre email et entrer le code pour vérifier votre compte.",
             });
         setTimeout(() => {
-          toast.success('Redirection vers la page de réinitialisation du mot de passe...');
           localStorage.setItem('email', data.email);
           navigate('/reset-password');
-        }, 1000);
+        }, 20);
       } else {
         toast.error(result.message || 'Échec de l\'envoi du code de vérification. Veuillez réessayer.'); 
       }

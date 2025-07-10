@@ -16,7 +16,7 @@ $data = json_decode(file_get_contents("php://input"));
 if (
     empty($data->userId) ||
     empty($data->name) ||
-    empty($data->mealType) ||
+    empty($data->maleType) ||
     !isset($data->calories) ||
     empty($data->date)
 ) {
@@ -36,7 +36,7 @@ $protein = isset($data->protein) ? $data->protein : 0;
 $carbs   = isset($data->carbs) ? $data->carbs : 0;
 $fat     = isset($data->fats) ? $data->fats : 0;
 
-$stmt->bind_param("issiiiis", $data->userId, $data->name, $data->mealType, $data->calories, $protein, $carbs, $fat, $data->date);
+$stmt->bind_param("issiiiis", $data->userId, $data->name, $data->maleType, $data->calories, $protein, $carbs, $fat, $data->date);
 
 if (!$stmt->execute()) {
     http_response_code(501);

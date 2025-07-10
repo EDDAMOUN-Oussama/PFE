@@ -26,7 +26,7 @@ export interface FoodEntry {
   carbs?: number;
   fat?: number;
   date: string;
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  maleType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 }
 
 export interface ExerciseEntry {
