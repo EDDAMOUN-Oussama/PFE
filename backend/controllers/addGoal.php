@@ -35,7 +35,7 @@ if ($currentValue >= $target && $type !== "weight") {
   $status = "terminé";
   $progress = 100;
 }
-else if ($currentValue >= $target && $type === "weight") {
+else if ($currentValue != $target && $type === "weight") {
   $status = "en cours";
   $progress = 50; // Pour les objectifs de poids, on ne considère pas que l'objectif est atteint si la valeur actuelle est supérieure à la cible
 }
