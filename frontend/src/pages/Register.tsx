@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -14,7 +15,7 @@ import { format, differenceInYears } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -34,8 +35,8 @@ const registerSchema = z.object({
   goalCalories: z.number().int().min(1, { message: 'Le poids objectif est requis' }),
   height: z.number().int().min(1, { message: 'La taille est requise' }),
   gender: z.enum(['male', 'female'], { message: 'Veuillez sélectionner votre sexe' }),
-  activityLevel: z.enum(['Sédentaire', 'Léger', 'Modéré', 'Actif', 'Très actif'], { 
-    message: 'Veuillez sélectionner votre niveau d\'activité' 
+  activityLevel: z.enum(['Sédentaire', 'Léger', 'Modéré', 'Actif', 'Très actif'], {
+    message: 'Veuillez sélectionner votre niveau d\'activité'
   }),
   password: z.string().min(8, { message: 'Le mot de passe doit contenir au moins 8 caractères' }),
   confirmPassword: z.string(),
@@ -54,7 +55,7 @@ export default function Register() {
   const [verificationCode, setVerificationCode] = useState('');
   const [submittedData, setSubmittedData] = useState<RegisterFormValues | null>(null);
   const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
-  
+
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -74,7 +75,7 @@ export default function Register() {
         ...data,
         dateOfBirth: format(data.dateOfBirth, "yyyy-MM-dd"),
       };
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/register.php', {
+      const response = await apiFetch('register.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -100,13 +101,13 @@ export default function Register() {
   }
 
   async function resendVerificationCode() {
-    if (!submittedData?.email) {  
+    if (!submittedData?.email) {
       toast.error('Aucun email soumis pour renvoyer le code de vérification.');
       return;
     }
     console.log('Renvoyer le code de vérification à:', submittedData.email);
     try {
-      const resendResponse = await fetch('http://localhost/pfe/PFE/backend/controllers/resend_code.php', {
+      const resendResponse = await apiFetch('resend_code.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ export default function Register() {
 
   async function verifyCode() {
     try {
-      const verifyResponse = await fetch('http://localhost/pfe/PFE/backend/controllers/verify_code.php', {
+      const verifyResponse = await apiFetch('verify_code.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -159,17 +160,17 @@ export default function Register() {
   }
 
   const months = [
-    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin", 
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
     "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
   ];
-  
+
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: currentYear - 1900 + 1 }, (_, i) => currentYear - i);
 
   if (isVerifying) {
     return (
-      <AuthLayout 
-        title="Vérifiez votre email" 
+      <AuthLayout
+        title="Vérifiez votre email"
         subtitle={`Entrez le code à 6 chiffres envoyé à ${submittedData?.email}`}
       >
         <div className="space-y-6">
@@ -188,7 +189,7 @@ export default function Register() {
                       const newCode = verificationCode.split('');
                       newCode[index] = value;
                       setVerificationCode(newCode.join(''));
-                      
+
                       if (value !== '' && index < 5) {
                         const nextInput = e.target.parentElement?.children[index + 1] as HTMLInputElement;
                         if (nextInput) nextInput.focus();
@@ -205,11 +206,11 @@ export default function Register() {
               ))}
             </div>
           </div>
-          
+
           <Button onClick={verifyCode} className="w-full">
             Vérifier l'email
           </Button>
-          
+
           <div className="text-center text-sm">
             <p>
               Vous n'avez pas reçu le code ?{' '}
@@ -224,8 +225,8 @@ export default function Register() {
   }
 
   return (
-    <AuthLayout 
-      title="Créer un compte" 
+    <AuthLayout
+      title="Créer un compte"
       subtitle="Entrez vos informations pour commencer"
     >
       <Form {...form}>
@@ -243,7 +244,7 @@ export default function Register() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="email"
@@ -325,7 +326,7 @@ export default function Register() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
+
                     <Calendar
                       mode="single"
                       selected={field.value}
@@ -481,7 +482,7 @@ export default function Register() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -513,7 +514,7 @@ export default function Register() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="confirmPassword"

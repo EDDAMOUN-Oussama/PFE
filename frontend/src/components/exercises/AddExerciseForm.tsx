@@ -1,3 +1,4 @@
+import { localDate } from '@/lib/health';
 
 import { useEffect } from 'react';
 import { useForm } from "react-hook-form";
@@ -34,11 +35,11 @@ const formSchema = z.object({
 });
 
 const MET_VALUES: Record<string, number> = {
-  cardio: 7,     
+  cardio: 7,
   Musculation: 6,
   Flexibilité: 3,
-  sports: 8,     
-  Autre: 5,      
+  sports: 8,
+  Autre: 5,
 };
 
 function calculateCaloriesBurned(
@@ -73,22 +74,24 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
       const calculated = calculateCaloriesBurned(watchType, watchDuration, user.currentWeight);
       form.setValue('caloriesBurned', calculated, { shouldValidate: true });
     }
-  }, [watchType, watchDuration, user]);
+  }, [watchType, watchDuration, user, form]);
 
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    addExerciseEntry({
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+    await addExerciseEntry({
       name: values.name,
       type: values.type,
       duration: values.duration,
       caloriesBurned: values.caloriesBurned,
-      date: new Date().toISOString(),
+      date: localDate(),
     });
     form.reset();
-    refetchUser(); // Re-fetch user data to update current weight
+
     if (onFinished) {
       onFinished();
     }
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Enregistrement impossible."); }
   }
 
   return (
@@ -165,7 +168,7 @@ export function AddExerciseForm({ onFinished }: { onFinished?: () => void }) {
                 )}
               />
             </div>
-            <Button type="submit">Ajouter l'exercice</Button>
+            <Button type="submit" disabled={form.formState.isSubmitting}>Ajouter l'exercice</Button>
           </form>
         </Form>
       </CardContent>

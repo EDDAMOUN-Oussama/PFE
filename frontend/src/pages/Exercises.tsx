@@ -6,7 +6,6 @@ import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import AddExerciseForm from '@/components/exercises/AddExerciseForm';
 import { useHealth, HealthProvider } from '@/contexts/HealthContext';
-import Sidebar from '@/components/Sidebar';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -41,7 +40,7 @@ const ExercisesPageContent = () => {
         return <Activity className={baseClass} />;
     }
   };
-  
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -69,10 +68,10 @@ const ExercisesPageContent = () => {
 
   const totalTarget = exerciseGoals.reduce((sum, g) => sum + g.target, 0);
   const totalCurrent = exerciseGoals.reduce((sum, g) => sum + g.currentValue, 0);
-  
+
   const progress = totalTarget > 0 ? Math.min((totalCurrent / totalTarget) * 100, 100) : 0;
   return (
-    <div className="flex-1 ml-64">
+    <div className="app-content">
       <div className="container p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Suivi des Exercices</h1>
@@ -186,7 +185,7 @@ const ExercisesPage = () => {
   return (
     <HealthProvider>
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+
         <ExercisesPageContent />
       </div>
     </HealthProvider>

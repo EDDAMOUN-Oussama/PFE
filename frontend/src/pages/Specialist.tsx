@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
+import { useState, useEffect, useCallback } from 'react';
 import { HealthProvider, useHealth } from '@/contexts/HealthContext';
-import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,11 @@ const SpecialistPageContent = () => {
     const [appointments, setAppointments] = useState([]);
     const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
 
-    const fetchAppointmentsForSpecialist = async () => {
+    const fetchAppointmentsForSpecialist = useCallback(async () => {
         if (!user) return;
         setIsLoadingAppointments(true);
         try {
-            const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
+            const response = await apiFetch(`getAppointments.php?user_id=${user.id}&role=${user.role}`);
             const data = await response.json();
             if (data.success) {
                 setAppointments(data.appointments);
@@ -27,17 +27,17 @@ const SpecialistPageContent = () => {
         } finally {
             setIsLoadingAppointments(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         if (user && user.role === 'specialist') {
             fetchAppointmentsForSpecialist();
         }
-    }, [user]);
+    }, [user, fetchAppointmentsForSpecialist]);
 
     const handleStatusUpdate = async (appointmentId, newStatus) => {
         try {
-            const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateAppointmentStatus.php', {
+            const response = await apiFetch('updateAppointmentStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ appointment_id: appointmentId, new_status: newStatus }),
@@ -55,18 +55,18 @@ const SpecialistPageContent = () => {
     };
 
     if (isUserLoading) {
-        return <div className="flex-1 ml-64 flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return <div className="app-content flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     if (user?.role !== 'specialist') {
-        return <div className="flex-1 ml-64 flex items-center justify-center h-screen"><p>Accès refusé. Cette page est réservée aux spécialistes.</p></div>;
+        return <div className="app-content flex items-center justify-center h-screen"><p>Accès refusé. Cette page est réservée aux spécialistes.</p></div>;
     }
 
     const pendingAppointments = appointments.filter(a => a.status === 'pending');
     const otherAppointments = appointments.filter(a => a.status !== 'pending');
 
     return (
-        <div className="flex-1 ml-64">
+        <div className="app-content">
             <div className="container p-6">
                 <h1 className="text-3xl font-bold flex items-center mb-6"><Stethoscope className="mr-3 h-8 w-8 text-primary" /> Espace Spécialiste</h1>
                 <Tabs defaultValue="pending" className="space-y-6">
@@ -74,7 +74,7 @@ const SpecialistPageContent = () => {
                         <TabsTrigger value="pending">Demandes en attente ({pendingAppointments.length})</TabsTrigger>
                         <TabsTrigger value="confirmed">Rendez-vous à venir / passés ({otherAppointments.length})</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="pending">
                         <Card>
                             <CardHeader><CardTitle>Demandes de rendez-vous en attente</CardTitle></CardHeader>
@@ -132,7 +132,7 @@ const SpecialistPage = () => {
     return (
         <HealthProvider>
             <div className="flex min-h-screen bg-background">
-                <Sidebar />
+
                 <SpecialistPageContent />
             </div>
         </HealthProvider>

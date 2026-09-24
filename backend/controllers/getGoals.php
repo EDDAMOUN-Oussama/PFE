@@ -13,7 +13,7 @@ if (!$userId) {
 
 $db = Database::connect();
 
-$sql = "SELECT * FROM Goal WHERE user_id = ?";
+$sql = "SELECT *, endDate AS deadline FROM Goal WHERE user_id = ?";
 $stmt = $db->prepare($sql);
 $stmt->bind_param("i", $userId);
 $stmt->execute();

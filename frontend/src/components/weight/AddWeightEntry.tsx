@@ -1,3 +1,4 @@
+import { localDate } from '@/lib/health';
 
 import { useState } from 'react';
 import { useHealth } from '@/contexts/HealthContext';
@@ -21,10 +22,10 @@ const AddWeightEntry = () => {
   if (isLoading || !user) {
     return <div>{t('loading')}</div>;
   }
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!weight || isNaN(Number(weight))) {
       toast({
         title: "Invalid weight",
@@ -33,7 +34,7 @@ const AddWeightEntry = () => {
       });
       return;
     }
-    
+
     if (!date || isNaN(new Date(date).getTime())) {
       toast({
         title: "Invalid date",
@@ -42,13 +43,13 @@ const AddWeightEntry = () => {
       });
       return;
     }
-    
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const selectedDate = new Date(date);
     selectedDate.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate > today) {
       toast({
         title: "Date invalide",
@@ -57,16 +58,18 @@ const AddWeightEntry = () => {
       });
       return;
     }
-    
+
     // Add the weight entry
-    addWeightEntry({
+    try {
+    await addWeightEntry({
       date: format(date, 'yyyy-MM-dd'),
       weight: Number(weight),
     });
-    
+
     // Reset form
     setWeight('');
-    
+    } catch (error) { toast({ title: 'Enregistrement impossible', description: error instanceof Error ? error.message : '', variant: 'destructive' }); }
+
   };
 
   return (
@@ -84,14 +87,14 @@ const AddWeightEntry = () => {
               <Input
                 id="weight"
                 type="number"
-                step="1"
+                step="0.1"
                 placeholder={user.currentWeight?.toString() || t('weight.enterWeight')}
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 className="mt-1"
               />
             </div>
-            
+
             <div>
               <label htmlFor="date" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 Date
@@ -104,7 +107,7 @@ const AddWeightEntry = () => {
               />
             </div>
           </div>
-          
+
           <Button type="submit" className="w-full mt-4">
             {t('weight.addWeightEntry')}
           </Button>

@@ -29,7 +29,7 @@ while ($row = $result->fetch_assoc()) {
     $entries[] = $row;
 }
 
-echo json_encode($entries);
+echo json_encode(['success' => true, 'entries' => $entries]);
 
 $stmt->close();
 $db->close();

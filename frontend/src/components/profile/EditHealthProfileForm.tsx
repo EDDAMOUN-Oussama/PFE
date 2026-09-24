@@ -1,5 +1,6 @@
+import { apiFetch } from '@/lib/api';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,7 +23,7 @@ const healthProfileSchema = z.object({
 type HealthProfileFormData = z.infer<typeof healthProfileSchema>;
 
 interface EditHealthProfileFormProps {
-  user: any;
+  user: import("@/types/health").User;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   refetchUser: () => Promise<void>;
@@ -40,9 +41,12 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
     },
   });
 
+  useEffect(() => {
+    if (open) form.reset({ currentWeight: Number(user.currentWeight), goalWeight: Number(user.goalWeight), height: Number(user.height), goalCalories: Number(user.goalCalories), activityLevel: user.activityLevel });
+  }, [open, user, form]);
   const onSubmit = async (data: HealthProfileFormData) => {
     try {
-      const response = await fetch ('http://localhost/pfe/PFE/backend/controllers/updateUserHealth.php', {
+      const response = await apiFetch('updateUserHealth.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json' },
@@ -61,7 +65,7 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
     catch (error) {
       console.error('Error updating health profile:', error);
       toast.error('Erreur lors de la mise à jour du profil de santé');
-    } 
+    }
   };
 
   return (
@@ -85,9 +89,9 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
                   <FormControl>
                     <div className="relative">
                       <Scale className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        className="pl-10" 
-                        type="number" 
+                      <Input
+                        className="pl-10"
+                        type="number"
                         step="1"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
@@ -108,9 +112,9 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
                   <FormControl>
                     <div className="relative">
                       <Target className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        className="pl-10" 
-                        type="number" 
+                      <Input
+                        className="pl-10"
+                        type="number"
                         step="0.1"
                         {...field}
                         onChange={(e) => field.onChange(parseFloat(e.target.value))}
@@ -131,8 +135,8 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
                   <FormControl>
                     <div className="relative">
                       <Ruler className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        className="pl-10" 
+                      <Input
+                        className="pl-10"
                         type="number"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
@@ -153,8 +157,8 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
                   <FormControl>
                     <div className="relative">
                       <Activity className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        className="pl-10" 
+                      <Input
+                        className="pl-10"
                         type="number"
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value))}
@@ -195,9 +199,9 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
               <Button type="submit" className="flex-1">
                 Sauvegarder
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >

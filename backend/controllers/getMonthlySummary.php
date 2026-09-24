@@ -8,7 +8,7 @@ $userId = $_GET['user_id'] ?? null;
 if (!$userId) exit(json_encode(['success'=>false,'message'=>'ID manquant']));
 
 
-$q1 = "SELECT weight, date FROM WeightEntry WHERE user_id = ? AND MONTH(date)=MONTH(CURDATE()) ORDER BY date ASC";
+$q1 = "SELECT weight, date FROM weightEntry WHERE user_id = ? AND MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE()) ORDER BY date ASC";
 $stmt = $db->prepare($q1);
 $stmt->bind_param("i",$userId);
 $stmt->execute();
@@ -20,7 +20,7 @@ $deltaWeight = $first !== null && $last !== null ? ($last - $first) : 0;
 $stmt->close();
 
 
-$q2 = "SELECT ROUND(AVG(calories),0) AS avgC FROM FoodEntry WHERE user_id= ? AND MONTH(date)=MONTH(CURDATE())";
+$q2 = "SELECT ROUND(AVG(total),0) AS avgC FROM (SELECT SUM(calories) AS total FROM foodEntry WHERE user_id=? AND MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE()) GROUP BY date) AS daily";
 $stmt = $db->prepare($q2);
 $stmt->bind_param("i",$userId);
 $stmt->execute();
@@ -29,7 +29,7 @@ $avgCalories = intval($res['avgC'] ?? 0);
 $stmt->close();
 
 
-$q3 = "SELECT COUNT(DISTINCT date) as daysEx FROM ExerciseEntry WHERE user_id=? AND MONTH(date)=MONTH(CURDATE())";
+$q3 = "SELECT COUNT(DISTINCT date) as daysEx FROM exerciseEntry WHERE user_id=? AND MONTH(date)=MONTH(CURDATE()) AND YEAR(date)=YEAR(CURDATE())";
 $stmt = $db->prepare($q3);
 $stmt->bind_param("i",$userId);
 $stmt->execute();

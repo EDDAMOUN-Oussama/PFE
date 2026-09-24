@@ -16,14 +16,14 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-$stmt = $db->prepare("SELECT date, weight FROM weightEntry WHERE user_id = ? ORDER BY date ASC LIMIT 30");
+$stmt = $db->prepare("SELECT date, weight FROM weightEntry WHERE user_id = ? AND date >= CURDATE() - INTERVAL 29 DAY ORDER BY date ASC");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $weightData = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
 
-$stmt = $db->prepare("SELECT date, (caloriesConsumed - caloriesBurned) AS netCalories FROM DailyStats WHERE user_id = ? ORDER BY date ASC LIMIT 30");
+$stmt = $db->prepare("SELECT date, (caloriesConsumed - caloriesBurned) AS netCalories FROM DailyStats WHERE user_id = ? AND date >= CURDATE() - INTERVAL 29 DAY ORDER BY date ASC");
 $stmt->bind_param("i", $userId);
 $stmt->execute();
 $calData = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);

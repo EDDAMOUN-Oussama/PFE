@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useHealth } from '@/contexts/HealthContext';
@@ -26,7 +27,7 @@ const DeleteAccountSection = () => {
         setIsDeleting(false);
         return;
       }
-      const res = await fetch('http://localhost/pfe/PFE/backend/controllers/deleteMyCompet.php', {
+      const res = await apiFetch('deleteMyCompet.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, code }),

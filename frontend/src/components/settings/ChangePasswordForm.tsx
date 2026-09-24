@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -48,7 +49,7 @@ export const ChangePasswordForm = ({ open, onOpenChange }: ChangePasswordFormPro
       return;
     }
     try {
-    const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updatePassword.php', {
+    const response = await apiFetch('updatePassword.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -175,9 +176,9 @@ export const ChangePasswordForm = ({ open, onOpenChange }: ChangePasswordFormPro
               <Button type="submit" className="flex-1">
                 Changer le mot de passe
               </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
                 className="flex-1"
               >

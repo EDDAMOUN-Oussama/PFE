@@ -1,7 +1,7 @@
+import { apiFetch } from '@/lib/api';
 
 import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
-import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BellRing, Smartphone, Lock, UserCog, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ const SettingsPageContent = () => {
   if (!user) return;
     setIsSubmittingRequest(true);
     try {
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/createSpecialistRequest.php', {
+      const response = await apiFetch('createSpecialistRequest.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id }),
@@ -36,6 +36,7 @@ const SettingsPageContent = () => {
       console.log(result);
       if (result.success) {
         toast.success('Demande envoyée avec succès !');
+        setShowSpecialistRequest(true);
         await refetchUser(); // On rafraîchit les données pour obtenir le nouveau statut
       } else {
         toast.error(`Erreur : ${result.message}`);
@@ -44,7 +45,7 @@ const SettingsPageContent = () => {
       toast.error("Erreur de connexion.");
     } finally {
       setIsSubmittingRequest(false);
-      setShowSpecialistRequest(true); // On affiche le message de demande en cours
+
     }
   };
 
@@ -57,34 +58,34 @@ const SettingsPageContent = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 ml-64 flex items-center justify-center h-screen">
+      <div className="app-content flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
- 
-  if (!user) {   return <div className="flex-1 ml-64 flex items-center justify-center h-screen"><p className="text-red-500">Erreur : Impossible de charger les données.</p></div>; }
 
- const renderSpecialistCardContent =  () => {   
+  if (!user) {   return <div className="app-content flex items-center justify-center h-screen"><p className="text-red-500">Erreur : Impossible de charger les données.</p></div>; }
+
+ const renderSpecialistCardContent =  () => {
     // await refetchUser();
     console.log('User specialist request status:', user.specialist_request_status);
-    if (user.specialist_request_status === 'pending') {   
+    if (user.specialist_request_status === 'pending') {
       // Do not update state here!
-      return 1; 
+      return 1;
     } else {
-      return 0; 
+      return 0;
     }
  };
 
   return (
-    <div className="flex-1 transition-all duration-300 sm:ml-16 md:ml-64 h-screen </div>overflow-auto">
+    <div className="app-content min-h-screen overflow-auto">
       <div className="container p-4 md:p-6 h-full">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">Paramètres</h1>
           <ThemeToggle />
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 h-full pb-6">
           <div className="lg:col-span-3 space-y-4 md:space-y-6">
             {/* Account Settings Card */}
@@ -105,29 +106,29 @@ const SettingsPageContent = () => {
                         Mettez à jour le mot de passe de votre compte
                       </p>
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="mt-2 md:mt-0"
                       onClick={() => setShowChangePasswordForm(true)}
                     >
                       Mettre à jour
                     </Button>
                   </div>
-                  
+
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
                     <div>
                       <h3 className="font-medium">Adresse email</h3>
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="mt-2 md:mt-0"
                       onClick={() => setShowEditProfile(true)}
                     >
                       Changer
                     </Button>
                   </div>
-              
+
                     <DeleteAccountSection />
                 </div>
               </CardContent>
@@ -145,8 +146,8 @@ const SettingsPageContent = () => {
               </CardHeader>
               <CardContent>
                 { !renderSpecialistCardContent() && !showSpecialistRequest ? (
-                  <Button 
-                    variant="default" 
+                  <Button
+                    variant="default"
                     className="w-full flex items-center justify-center"
                     onClick={handleSpecialistRequest}
                   >
@@ -169,15 +170,15 @@ const SettingsPageContent = () => {
         </div>
       </div>
 
-      <ChangePasswordForm 
-        open={showChangePasswordForm} 
-        onOpenChange={setShowChangePasswordForm} 
+      <ChangePasswordForm
+        open={showChangePasswordForm}
+        onOpenChange={setShowChangePasswordForm}
       />
-      
-      <EditProfileForm 
+
+      <EditProfileForm
         user={user}
-        open={showEditProfile} 
-        onOpenChange={setShowEditProfile} 
+        open={showEditProfile}
+        onOpenChange={setShowEditProfile}
         refetchUser={refetchUser}
       />
     </div>
@@ -188,7 +189,7 @@ const SettingsPage = () => {
   return (
     <HealthProvider>
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+
         <SettingsPageContent />
       </div>
     </HealthProvider>

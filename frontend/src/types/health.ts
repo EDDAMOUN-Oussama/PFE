@@ -1,57 +1,11 @@
-
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  goalWeight?: number;
-  currentWeight?: number;
-  height?: number;
-  age?: number;
-  gender?: 'male' | 'female' | 'other';
-  goalCalories?: number;
-  activityLevel?: 'sedentary' | 'light' | 'moderate' | 'active' | 'very active';
+  id: string; name: string; email: string; birthdate: string; gender: string;
+  currentWeight: number; goalWeight: number; height: number; goalCalories: number; activityLevel: string;
+  role: 'user' | 'admin' | 'specialist'; memberSince?: string;
+  specialist_request_status?: 'pending' | 'approved' | 'rejected';
 }
-
-export interface WeightEntry {
-  id: string;
-  date: string;
-  weight: number;
-}
-
-export interface FoodEntry {
-  id: string;
-  name: string;
-  calories: number;
-  protein?: number;
-  carbs?: number;
-  fat?: number;
-  date: string;
-  maleType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-}
-
-export interface ExerciseEntry {
-  id: string;
-  name: string;
-  duration: number; // in minutes
-  caloriesBurned: number;
-  date: string;
-  type: 'cardio' | 'strength' | 'flexibility' | 'sports' | 'other';
-}
-
-export interface Goal {
-  id: string;
-  type: 'weight' | 'calories' | 'exercise';
-  target: number;
-  currentValue: number;
-  deadline?: string;
-  progress: number; // percentage 0-100
-}
-
-export interface DailyStats {
-  date: string;
-  caloriesConsumed: number;
-  caloriesBurned: number;
-  netCalories: number;
-  weight?: number;
-  exerciseMinutes: number;
-}
+export interface Goal { id: string; title: string; type: string; target: number; startValue?: number; currentValue: number; progress: number; deadline?: string; }
+export interface ExerciseEntry { id: string; name: string; type: string; duration: number; caloriesBurned: number; date: string; }
+export interface FoodEntry { id: string; name: string; maleType: string; calories: number; protein?: number; carbs?: number; fats?: number; date: string; }
+export interface WeightEntry { id: string; weight: number; date: string; }
+export interface DailyStats { caloriesConsumed: number; caloriesBurned: number; netCalories: number; exerciseMinutes: number; currentWeight: number; }

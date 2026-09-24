@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -29,20 +30,20 @@ export default function ResetPassword() {
   const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
       email: localStorage.getItem('email') || '',
       password: '',
       confirmPassword: '',
-      code_viryfication: '', 
+      code_viryfication: '',
     },
   });
 
   async function onSubmit(data: ResetPasswordFormValues) {
     try {
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/resetpass.php', {
+      const response = await apiFetch('resetpass.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,14 +64,14 @@ export default function ResetPassword() {
       } else {
         toast.error(result.message || 'Échec de la réinitialisation du mot de passe. Veuillez réessayer.');
       }
-  } catch (error) { 
+  } catch (error) {
       console.error('Erreur lors de la réinitialisation du mot de passe :', error);
       toast.error('Une erreur s\'est produite lors de la réinitialisation de votre mot de passe. Veuillez réessayer plus tard.');
     }
   }
 
   return (
-    <AuthLayout 
+    <AuthLayout
       title={t('auth.resetPasswordTitle')}
       subtitle={t('auth.resetPasswordSubtitle')}
     >
@@ -115,7 +116,7 @@ export default function ResetPassword() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -147,7 +148,7 @@ export default function ResetPassword() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="confirmPassword"

@@ -8,7 +8,7 @@ $userId = $_GET['user_id'] ?? null;
 if (!$userId) exit(json_encode(['success'=>false,'message'=>'ID manquant']));
 
 $query = "SELECT DATE(date) AS date, weight
-      FROM WeightEntry
+      FROM weightEntry
       WHERE user_id = ? AND date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
       ORDER BY date ASC";
 $stmt = $db->prepare($query);

@@ -33,8 +33,11 @@ if (!$storedPassword || !password_verify($code, $storedPassword)) {
 }
 
 
+$db->begin_transaction();
+try {
 $tables = ['foodEntry', 'exerciseEntry', 'weightEntry', 'Goal', 'mealPlan', 'DailyStats'];
 foreach ($tables as $table) {
+    if ($table === 'mealPlan' && $db->query("SHOW TABLES LIKE 'mealPlan'")->num_rows === 0) continue;
     $stmt = $db->prepare("DELETE FROM $table WHERE user_id = ?");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -42,11 +45,22 @@ foreach ($tables as $table) {
 }
 
 
+$stmt = $db->prepare('DELETE FROM appointments WHERE patient_id = ? OR specialist_id = ?');
+$stmt->bind_param('ii', $userId, $userId); $stmt->execute();
+$stmt = $db->prepare('DELETE FROM specialist_requests WHERE user_id = ?');
+$stmt->bind_param('i', $userId); $stmt->execute();
+$stmt = $db->prepare('DELETE FROM auth_codes WHERE user_id = ?');
+$stmt->bind_param('i', $userId); $stmt->execute();
 $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
 $stmt->bind_param("i", $userId);
 $success = $stmt->execute();
 $stmt->close();
 
+$db->commit();
+} catch (Throwable $error) {
+    $db->rollback(); http_response_code(500);
+    echo json_encode(['success'=>false,'message'=>'Suppression impossible. Aucune modification conservee.']); exit;
+}
 $db->close();
 
 echo json_encode([

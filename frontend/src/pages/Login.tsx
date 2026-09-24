@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -23,7 +24,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -34,7 +35,7 @@ export default function Login() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const res = await fetch('http://localhost/pfe/PFE/backend/controllers/login.php', {
+      const res = await apiFetch('login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,6 +53,7 @@ export default function Login() {
         toast.success('Connexion réussie !');
         localStorage.setItem('user', JSON.stringify(result.user));
         localStorage.setItem('user_id', result.user.id.toString());
+        window.dispatchEvent(new Event('healthytrack:authenticated'));
         navigate('/dashboard');
       } else {
         toast.error(result.message || 'Échec de la connexion');
@@ -63,8 +65,8 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout 
-      title={"Bienvenue!"} 
+    <AuthLayout
+      title={"Bienvenue!"}
       subtitle={t('auth.signInCredentials')}
     >
       <Form {...form}>
@@ -82,7 +84,7 @@ export default function Login() {
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="password"
@@ -117,8 +119,8 @@ export default function Login() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="font-medium text-primary hover:text-primary/80"
               >
                 {t('auth.forgotPassword')}

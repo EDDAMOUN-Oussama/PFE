@@ -1,7 +1,7 @@
+import { apiFetch } from '@/lib/api';
 import { useEffect, useState } from 'react';
-import { HealthProvider } from '@/contexts/HealthContext';
+import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
-import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Activity, UserPlus, Shield, Settings, CheckCircle, X, User, Loader2 } from 'lucide-react';
@@ -10,13 +10,14 @@ import { toast } from 'sonner';
 
 const AdminPageContent = () => {
   const { t } = useI18n();
+  const { user } = useHealth();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/getSpecialistRequests.php');
+      const response = await apiFetch('getSpecialistRequests.php');
       const data = await response.json();
       if (data.success) {
         setRequests(data.requests);
@@ -31,12 +32,12 @@ const AdminPageContent = () => {
   };
 
   useEffect(() => {
-    fetchRequests();
-  }, []);
+    if (user?.role === 'admin') void fetchRequests();
+  }, [user?.role]);
 
   const handleRequestUpdate = async (requestId, newStatus) => {
     try {
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateSpecialistRequest.php', {
+      const response = await apiFetch('updateSpecialistRequest.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ request_id: requestId, new_status: newStatus }),
@@ -53,9 +54,10 @@ const AdminPageContent = () => {
       toast.error("Erreur de connexion.");
     }
   };
-  
+
+  if (user?.role !== 'admin') return <p className="app-content p-6">Acces reserve aux administrateurs.</p>;
   return (
-    <div className="flex-1 ml-64">
+    <div className="app-content">
       <div className="container p-6">
         <h1 className="text-3xl font-bold mb-6">{t('admin.title')}</h1>
         {/* ... Cartes de statistiques ... */}
@@ -116,7 +118,7 @@ const AdminPage = () => {
   return (
     <HealthProvider>
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+
         <AdminPageContent />
       </div>
     </HealthProvider>

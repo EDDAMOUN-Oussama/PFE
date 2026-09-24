@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { apiFetch } from '@/lib/api';
+import { useState, useEffect, useCallback } from 'react';
 import { HealthProvider, useHealth } from '@/contexts/HealthContext';
 import { useI18n } from '@/contexts/I18nContext';
-import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, Stethoscope, Plus, MoreHorizontal, Loader2 } from 'lucide-react';
@@ -21,7 +21,7 @@ const NewAppointmentForm = ({ onSubmit, onCancel }) => {
     useEffect(() => {
         const fetchSpecialists = async () => {
             try {
-                const response = await fetch('http://localhost/pfe/PFE/backend/controllers/getSpecialists.php');
+                const response = await apiFetch('getSpecialists.php');
                 const data = await response.json();
                 if (data.success) {
                     setSpecialists(data.specialists);
@@ -86,11 +86,11 @@ const AppointmentsPageContent = () => {
     const [isLoadingAppointments, setIsLoadingAppointments] = useState(true);
     const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false);
 
-    const fetchAppointments = async () => {
+    const fetchAppointments = useCallback(async () => {
         if (!user) return;
         setIsLoadingAppointments(true);
         try {
-            const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
+            const response = await apiFetch(`getAppointments.php?user_id=${user.id}&role=${user.role}`);
             const data = await response.json();
             if (data.success) {
                 setAppointments(data.appointments);
@@ -100,16 +100,16 @@ const AppointmentsPageContent = () => {
         } finally {
             setIsLoadingAppointments(false);
         }
-    };
+    }, [user]);
 
     useEffect(() => {
         fetchAppointments();
-    }, [user]);
+    }, [user, fetchAppointments]);
 
     const handleNewAppointmentSubmit = async (formData) => {
         if (!user) return;
         try {
-            const response = await fetch('http://localhost/pfe/PFE/backend/controllers/createAppointment.php', {
+            const response = await apiFetch('createAppointment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...formData, patient_id: user.id }),
@@ -128,11 +128,11 @@ const AppointmentsPageContent = () => {
     };
 
     if (isUserLoading) {
-        return <div className="flex-1 ml-64 flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+        return <div className="app-content flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin" /></div>;
     }
 
     return (
-        <div className="flex-1 ml-64">
+        <div className="app-content">
             <div className="container p-6">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-3xl font-bold">{t('appointments.title')}</h1>
@@ -172,7 +172,7 @@ const AppointmentsPage = () => {
     return (
         <HealthProvider>
             <div className="flex min-h-screen bg-background">
-                <Sidebar />
+
                 <AppointmentsPageContent />
             </div>
         </HealthProvider>

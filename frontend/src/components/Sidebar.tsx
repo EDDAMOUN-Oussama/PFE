@@ -1,3 +1,4 @@
+import { api } from '@/lib/api';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
@@ -34,24 +35,18 @@ const Sidebar = () => {
     { icon: ShieldCheck, label: t('nav.admin'), path: '/admin', roles: ['admin'] },
   ];
 
-  const [visibleMenuItems, setVisibleMenuItems] = useState([]);
-
-  // On filtre les liens à afficher en fonction du rôle de l'utilisateur
+  const visibleMenuItems = allMenuItems.filter(item => item.roles.includes(user?.role || 'user'));
   useEffect(() => {
-    if (user?.role) {
-      const filtered = allMenuItems.filter(item => item.roles.includes(user.role));
-      setVisibleMenuItems(filtered);
-    } else {
-      // Si l'utilisateur n'est pas encore chargé, on n'affiche que les liens de base
-      const defaultItems = allMenuItems.filter(item => item.roles.includes('user') && item.path !== '/specialist' && item.path !== '/admin');
-      setVisibleMenuItems(defaultItems);
-    }
-  }, [user, t]); // On ajoute `t` aux dépendances pour que les traductions se mettent à jour
-
-  const handleLogout = () => {
-    localStorage.removeItem('user_id');
-    toast.success('Déconnexion réussie');
-    navigate('/login');
+    document.documentElement.style.setProperty('--sidebar-width', collapsed ? '5rem' : '16rem');
+    return () => { document.documentElement.style.removeProperty('--sidebar-width'); };
+  }, [collapsed]);
+  const handleLogout = async () => {
+    try {
+      await api('logout.php', {});
+      localStorage.removeItem('user_id'); localStorage.removeItem('user');
+      window.dispatchEvent(new Event('healthytrack:unauthorized'));
+      navigate('/login');
+    } catch (error) { toast.error(error instanceof Error ? error.message : 'Deconnexion impossible.'); }
   };
 
   const toggleSidebar = () => setCollapsed(!collapsed);
@@ -63,16 +58,16 @@ const Sidebar = () => {
   };
 
   return (
-    <div className={`h-screen ${collapsed ? 'w-20' : 'w-64'} bg-sidebar fixed left-0 top-0 text-sidebar-foreground flex flex-col transition-all duration-300 z-50`}>
+    <div className={`app-sidebar h-screen bg-sidebar fixed left-0 top-0 text-sidebar-foreground flex flex-col transition-all duration-300 z-50`}>
       {/* Header de la Sidebar */}
       <div className={`p-4 flex ${collapsed ? 'justify-center' : 'justify-between'} items-center border-b border-sidebar-border h-20`}>
         {!collapsed && (
-          <h1 className="text-2xl font-bold flex items-center">
+          <h1 className="sidebar-label text-2xl font-bold flex items-center">
             <Activity className="mr-2 h-6 w-6 text-sidebar-primary" />
             HealthyTrack
           </h1>
         )}
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="h-8 w-8 rounded-full hover:bg-sidebar-accent">
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} aria-label={collapsed ? "Ouvrir le menu" : "Reduire le menu"} className="hidden md:inline-flex h-8 w-8 rounded-full hover:bg-sidebar-accent">
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
@@ -85,10 +80,10 @@ const Sidebar = () => {
               <button
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center px-3 py-3 text-sm rounded-md hover:bg-sidebar-accent group transition-colors ${location.pathname.startsWith(item.path) ? 'bg-sidebar-accent' : ''} ${collapsed ? 'justify-center' : ''}`}
-                title={collapsed ? item.label : undefined}
+                aria-label={item.label} title={item.label}
               >
                 <item.icon className={`h-5 w-5 flex-shrink-0 ${collapsed ? '' : 'mr-3'} ${location.pathname.startsWith(item.path) ? 'text-sidebar-primary' : 'text-sidebar-foreground group-hover:text-sidebar-primary'}`} />
-                {!collapsed && item.label}
+                {!collapsed && <span className="sidebar-label">{item.label}</span>}
               </button>
             </li>
           ))}
@@ -110,7 +105,7 @@ const Sidebar = () => {
               {getInitials(user.name)}
             </div>
             {!collapsed && (
-              <div className="ml-3 overflow-hidden">
+              <div className="sidebar-label ml-3 overflow-hidden">
                 <p className="text-sm font-medium truncate">{user.name}</p>
                 <p className="text-xs text-sidebar-foreground/70 truncate">{user.email}</p>
               </div>
@@ -124,10 +119,10 @@ const Sidebar = () => {
         <button
           onClick={handleLogout}
           className={`mt-4 w-full flex ${collapsed ? 'justify-center' : ''} items-center px-3 py-3 text-sm rounded-md text-destructive hover:bg-destructive/10 group transition-colors`}
-          title={collapsed ? "Déconnexion" : undefined}
+          aria-label="Deconnexion" title="Deconnexion"
         >
           <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!collapsed && <span className="ml-3">Déconnexion</span>}
+          {!collapsed && <span className="sidebar-label ml-3">Déconnexion</span>}
         </button>
       </div>
     </div>

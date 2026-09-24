@@ -6,7 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { Scale, ArrowDown, ArrowUp } from 'lucide-react';
 
 // Custom tooltip for the chart
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value?: number | string }>; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover text-popover-foreground p-2 rounded-md shadow-md border border-border">
@@ -23,25 +23,25 @@ const WeightTracker = () => {
   if (isLoading || !user) {
     return <div>Chargement des données...</div>;
   }
-  
+
   // Sort entries by date
-  const sortedEntries = [...weightEntries].sort((a, b) => 
+  const sortedEntries = [...weightEntries].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
-  
+
 
   // Get first and last entry to calculate overall change
   const firstEntry = sortedEntries[0]?.weight;
   const lastEntry = sortedEntries[sortedEntries.length - 1]?.weight;
   const weightChange = lastEntry && firstEntry ? (lastEntry - firstEntry).toFixed(1) : '0';
   const isWeightLoss = Number(weightChange) < 0;
-  
-  
+
+
   // Calculate min and max for y-axis
   const weights = sortedEntries.map(entry => entry.weight);
   const minWeight = Math.floor(Math.min(...weights, user.goalWeight || Infinity)) - 1;
   const maxWeight = Math.ceil(Math.max(...weights)) + 1;
-  
+
   return (
     <Card className="shadow-sm">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -69,7 +69,7 @@ const WeightTracker = () => {
               )}
             </div>
           </div>
-          
+
           {user.goalWeight && (
             <div>
               <p className="text-sm text-muted-foreground">Poids Objectif</p>
@@ -82,7 +82,7 @@ const WeightTracker = () => {
             </div>
           )}
         </div>
-        
+
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -90,15 +90,15 @@ const WeightTracker = () => {
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 tickFormatter={(date) => format(new Date(date), 'd MMM')}
-                stroke="hsl(var(--muted-foreground))" 
+                stroke="hsl(var(--muted-foreground))"
                 tick={{ fontSize: 12 }}
               />
-              <YAxis 
-                domain={[minWeight, maxWeight]} 
-                stroke="hsl(var(--muted-foreground))" 
+              <YAxis
+                domain={[minWeight, maxWeight]}
+                stroke="hsl(var(--muted-foreground))"
                 tick={{ fontSize: 12 }}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -123,7 +123,7 @@ const WeightTracker = () => {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        
+
         {weightEntries.length === 0 && (
           <p className="text-center text-muted-foreground mt-4">Aucune donnée de poids disponible pour le moment.</p>
         )}

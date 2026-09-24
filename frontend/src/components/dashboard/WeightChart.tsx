@@ -4,7 +4,7 @@ import { useHealth } from '@/contexts/HealthContext';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { subDays, format } from 'date-fns';
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value?: number | string }>; label?: string }) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-popover text-popover-foreground p-2 rounded-md shadow-md border border-border">
@@ -18,7 +18,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 const WeightChart = () => {
   const { weightEntries, user } = useHealth();
-  
+
   // Get last 14 days of data
   const recentEntries = weightEntries
     .slice(-14)
@@ -31,7 +31,7 @@ const WeightChart = () => {
   const weights = recentEntries.map(entry => entry.weight);
   const minWeight = Math.floor(Math.min(...weights)) - 1;
   const maxWeight = Math.ceil(Math.max(...weights)) + 1;
-  
+
   // Check if there's a goal weight
   const showGoal = user.goalWeight && user.goalWeight > 0;
 
@@ -41,7 +41,7 @@ const WeightChart = () => {
         <h3 className="health-card-title">Évolution du Poids</h3>
         <span className="text-sm text-muted-foreground">14 derniers jours</span>
       </div>
-      
+
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
@@ -49,15 +49,15 @@ const WeightChart = () => {
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
-            <XAxis 
-              dataKey="date" 
+            <XAxis
+              dataKey="date"
               tickFormatter={(date) => format(new Date(date), 'dd')}
-              stroke="hsl(var(--muted-foreground))" 
+              stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
             />
-            <YAxis 
-              domain={[minWeight, maxWeight]} 
-              stroke="hsl(var(--muted-foreground))" 
+            <YAxis
+              domain={[minWeight, maxWeight]}
+              stroke="hsl(var(--muted-foreground))"
               tick={{ fontSize: 12 }}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -82,7 +82,7 @@ const WeightChart = () => {
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
+
       {showGoal && (
         <div className="mt-2 text-sm flex items-center justify-end">
           <div className="w-3 h-1 bg-accent-foreground mr-1"></div>

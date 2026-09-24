@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useHealth, HealthProvider } from '@/contexts/HealthContext';
-import Sidebar from '@/components/Sidebar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Apple, Coffee, UtensilsCrossed, Plus } from 'lucide-react';
@@ -37,7 +36,7 @@ const dinner = calculateMealData('dinner');
   }, [location.state]);
 
   return (
-    <div className="flex-1 ml-64">
+    <div className="app-content">
       <div className="container p-6">
         <h1 className="text-3xl font-bold mb-6">Suivi Nutritionnel
           <span className="text-muted-foreground text-lg ml-2">
@@ -58,7 +57,7 @@ const dinner = calculateMealData('dinner');
 
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium flex items-center">
@@ -71,7 +70,7 @@ const dinner = calculateMealData('dinner');
               <p className="text-sm text-muted-foreground">{lunch.count} éléments suivis</p>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg font-medium flex items-center">
@@ -86,10 +85,10 @@ const dinner = calculateMealData('dinner');
             </CardContent>
           </Card>
         </div>
-        
+
         {/* Conditionally show Add Food Form */}
         {showAddForm && <AddFoodForm />}
-        
+
         {/* Food Journal */}
         <Card className="mb-6">
           <CardHeader>
@@ -99,7 +98,7 @@ const dinner = calculateMealData('dinner');
             <p className="text-muted-foreground mb-4">Suivez vos repas pour surveiller votre apport calorique et nutritionnel.</p>
             <div className="border rounded-md p-6 text-center">
               <p className="mb-4">Utilisez le bouton "Ajouter Aliment" pour commencer à suivre vos repas d'aujourd'hui.</p>
-              <Button 
+              <Button
                 className="mt-2"
                 onClick={() => setShowAddForm(!showAddForm)}
               >
@@ -118,7 +117,7 @@ const NutritionPage = () => {
   return (
     <HealthProvider>
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+
         <NutritionPageContent />
       </div>
     </HealthProvider>

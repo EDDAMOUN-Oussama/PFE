@@ -1,3 +1,4 @@
+import { localDate } from '@/lib/health';
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -26,9 +27,9 @@ const AddFoodForm = () => {
   const { addFoodEntry } = useHealth();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!foodName || !maleType || !calories) {
       toast({
         title: "Erreur",
@@ -45,11 +46,12 @@ const AddFoodForm = () => {
       protein: protein ? parseInt(protein) : 0,
       carbs: carbs ? parseInt(carbs) : 0,
       fats: fats ? parseInt(fats) : 0,
-      date: new Date().toISOString(),
+      date: localDate(),
     };
 
-    addFoodEntry(newFoodEntry);
-    
+    try {
+    await addFoodEntry(newFoodEntry);
+
     // Reset form
     setFoodName('');
     setmaleType('');
@@ -57,6 +59,7 @@ const AddFoodForm = () => {
     setProtein('');
     setCarbs('');
     setFats('');
+    } catch (error) { toast({ title: 'Enregistrement impossible', description: error instanceof Error ? error.message : '', variant: 'destructive' }); }
 
   };
 
@@ -68,7 +71,7 @@ const AddFoodForm = () => {
     setCalories(total.toString());
   }, [protein, carbs, fats]);
 
-  
+
   return (
     <Card className="mb-6">
       <CardHeader>
@@ -88,7 +91,7 @@ const AddFoodForm = () => {
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="maleType">Type de repas *</Label>
               <Select value={maleType} onValueChange={setmaleType} required>
@@ -118,7 +121,7 @@ const AddFoodForm = () => {
                 required
               />
             </div>
-            
+
             <div>
               <Label htmlFor="protein">Protéines (g)</Label>
               <Input
@@ -130,7 +133,7 @@ const AddFoodForm = () => {
                 min="0"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="carbs">Glucides (g)</Label>
               <Input
@@ -142,7 +145,7 @@ const AddFoodForm = () => {
                 min="0"
               />
             </div>
-            
+
             <div>
               <Label htmlFor="fats">Lipides (g)</Label>
               <Input

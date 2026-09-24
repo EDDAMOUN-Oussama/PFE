@@ -1,3 +1,4 @@
+import { apiFetch } from '@/lib/api';
 
 import { useNavigate, Link } from 'react-router-dom';
 import { z } from 'zod';
@@ -17,7 +18,7 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
-  
+
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
     defaultValues: {
@@ -27,7 +28,7 @@ export default function ForgotPassword() {
 
   async function onSubmit(data: ForgotPasswordFormValues) {
     try {
-      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/forgotPassword.php', {
+      const response = await apiFetch('forgotPassword.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,7 +47,7 @@ export default function ForgotPassword() {
           navigate('/reset-password');
         }, 20);
       } else {
-        toast.error(result.message || 'Échec de l\'envoi du code de vérification. Veuillez réessayer.'); 
+        toast.error(result.message || 'Échec de l\'envoi du code de vérification. Veuillez réessayer.');
       }
     } catch (error) {
       console.error('Erreur lors de la demande de réinitialisation du mot de passe :', error);
@@ -55,8 +56,8 @@ export default function ForgotPassword() {
   }
 
   return (
-    <AuthLayout 
-      title="Réinitialiser votre mot de passe" 
+    <AuthLayout
+      title="Réinitialiser votre mot de passe"
       subtitle="Entrez votre email pour recevoir un lien de réinitialisation"
     >
       <Form {...form}>

@@ -43,12 +43,12 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       title: "",
       type: "weight",
       target: 0,
-      currentValue: user.currentWeight | 0,
+      currentValue: user?.currentWeight ?? 0,
       deadline: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     const progress = values.target > 0 ? Math.min((values.currentValue / values.target) * 100, 100) : 0;
     // if (values.type === "weight" && values.currentValue > values.target) {
     //   toast.error("La valeur actuelle ne peut pas être inférieure ou égale à la cible pour un objectif de poids.");
@@ -62,7 +62,8 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       return;
     }
 
-    addGoal({
+    try {
+    await addGoal({
       title: values.title,
       type: values.type,
       target: values.target,
@@ -70,11 +71,12 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       progress: progress,
       deadline: values.deadline || undefined,
     });
-    
+
     form.reset();
     if (onFinished) {
       onFinished();
     }
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Creation impossible."); }
   }
 
   const getUnitLabel = (type: string) => {
@@ -84,7 +86,7 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
       case 'calories':
         return 'kcal';
       case 'exercise':
-        return 'min/semaine';
+        return 'min';
       default:
         return '';
     }
@@ -108,7 +110,7 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="type"
@@ -123,15 +125,15 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
                 </FormControl>
                 <SelectContent>
                   <SelectItem value="weight">Poids</SelectItem>
-                  <SelectItem value="calories">Calories quotidiennes</SelectItem>
-                  <SelectItem value="exercise">Exercice hebdomadaire</SelectItem>
+                  <SelectItem value="calories">Calories sur la periode</SelectItem>
+                  <SelectItem value="exercise">Exercice sur la periode</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        
+
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -140,13 +142,13 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
               <FormItem>
                 <FormLabel>Valeur actuelle ({getUnitLabel(watchedType)})</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input type="number" step="0.1" placeholder="0" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name="target"
@@ -154,14 +156,14 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
               <FormItem>
                 <FormLabel>Objectif cible ({getUnitLabel(watchedType)})</FormLabel>
                 <FormControl>
-                  <Input type="number" placeholder="0" {...field} />
+                  <Input type="number" step="0.1" placeholder="0" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
-        
+
         <FormField
           control={form.control}
           name="deadline"
@@ -175,9 +177,9 @@ export function AddGoalForm({ onFinished }: { onFinished?: () => void }) {
             </FormItem>
           )}
         />
-        
+
         <div className="flex gap-2">
-          <Button type="submit">Créer l'objectif</Button>
+          <Button type="submit" disabled={form.formState.isSubmitting}>Créer l'objectif</Button>
           {onFinished && (
             <Button type="button" variant="outline" onClick={onFinished}>
               Annuler

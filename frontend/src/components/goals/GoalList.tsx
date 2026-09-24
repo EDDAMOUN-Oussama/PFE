@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useHealth } from '@/contexts/HealthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -9,9 +9,9 @@ export default function GoalList() {
   const [editingId, setEditing] = useState<string | null>(null);
   const [values, setValues] = useState({ currentValue: 0 });
 
-  useEffect(() => { loadGoals(); }, []);
 
-  if (goals.length === 0) return <p>لا توجد أهداف لعرضها حتى الآن.</p>;
+
+  if (goals.length === 0) return <p>Aucun objectif pour le moment.</p>;
 
   return (
     <div>
@@ -29,18 +29,18 @@ export default function GoalList() {
                 size="sm"
                 onClick={() => {
                   updateGoal({ ...goal, currentValue: values.currentValue, progress: Math.round((values.currentValue/goal.target)*100) })
-                    .then(() => { toast.success('تمّ التحديث'); setEditing(null); })
-                    .catch(() => toast.error('خطأ'));
+                    .then(() => { toast.success('Objectif mis a jour.'); setEditing(null); })
+                    .catch(() => toast.error('Operation impossible.'));
                 }}
-              >حفظ</Button>
-              <Button variant="outline" size="sm" onClick={() => setEditing(null)}>إلغاء</Button>
+              >Enregistrer</Button>
+              <Button variant="outline" size="sm" onClick={() => setEditing(null)}>Annuler</Button>
             </div>
           ) : (
             <div className="flex justify-between items-center">
-              <span>الحالي: {goal.currentValue} / الهدف: {goal.target}</span>
+              <span>Actuel : {goal.currentValue} / Cible : {goal.target}</span>
               <div className="space-x-2">
-                <Button variant="outline" size="sm" onClick={() => { setEditing(goal.id); setValues({ currentValue: goal.currentValue }); }}>تعديل</Button>
-                <Button variant="outline" size="sm" onClick={() => deleteGoal(goal.id).then(() => toast.success('تم الحذف')).catch(() => toast.error('خطأ'))}>🗑️ حذف</Button>
+                <Button variant="outline" size="sm" onClick={() => { setEditing(goal.id); setValues({ currentValue: goal.currentValue }); }}>Modifier</Button>
+                <Button variant="outline" size="sm" onClick={() => deleteGoal(goal.id).then(() => toast.success('Objectif mis a jour.')).catch(() => toast.error('Operation impossible.'))}>Supprimer</Button>
               </div>
             </div>
           )}

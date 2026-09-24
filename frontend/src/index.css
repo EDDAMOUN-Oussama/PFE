@@ -73,7 +73,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
-    
+
     --sidebar-background: 215 30% 12%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: 196 100% 50%;
@@ -99,7 +99,7 @@
   .health-input {
     @apply px-3 py-2 rounded-md border border-input w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring;
   }
-  
+
   .health-card {
     @apply bg-card text-card-foreground rounded-lg border border-border shadow-sm p-6;
   }
@@ -107,16 +107,27 @@
   .health-card-header {
     @apply flex items-center justify-between mb-4;
   }
-  
+
   .health-card-title {
     @apply text-xl font-semibold tracking-tight;
   }
-  
+
   .health-stat {
     @apply text-3xl font-bold;
   }
-  
+
   .health-label {
     @apply text-sm font-medium text-muted-foreground;
   }
+}
+
+/* One sidebar width drives all authenticated page layouts. */
+.app-sidebar { width: var(--sidebar-width, 16rem); }
+.app-content { flex: 1; min-width: 0; margin-left: var(--sidebar-width, 16rem); }
+@media (max-width: 767px) {
+  .app-sidebar { width: 4.5rem; }
+  .app-content { margin-left: 4.5rem; }
+  .app-sidebar .sidebar-label { display: none; }
+  .app-sidebar nav button { justify-content: center; padding-left: .5rem; padding-right: .5rem; }
+  .app-sidebar nav svg { margin-right: 0; }
 }

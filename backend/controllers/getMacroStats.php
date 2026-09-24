@@ -9,7 +9,7 @@ if (!$userId) exit(json_encode(['success'=>false,'message'=>'ID manquant']));
 
 // Sommes journalières moyennes pour protéines/glucides/lipides
 $query = "SELECT AVG(protein) AS prot, AVG(carbs) AS carbs, AVG(fats) AS fats
-          FROM FoodEntry
+          FROM foodEntry
           WHERE user_id = ?";
 $stmt = $db->prepare($query);
 $stmt->bind_param("i", $userId);
@@ -18,9 +18,9 @@ $res = $stmt->get_result()->fetch_assoc();
 echo json_encode([
   'success'=>true,
   'data'=>[
-    ['name'=>'Protéines','value'=>round($res['prot'])],
-    ['name'=>'Glucides','value'=>round($res['carbs'])],
-    ['name'=>'Lipides','value'=>round($res['fats'])],
+    ['name'=>'Protéines','value'=>round($res['prot'] ?? 0)],
+    ['name'=>'Glucides','value'=>round($res['carbs'] ?? 0)],
+    ['name'=>'Lipides','value'=>round($res['fats'] ?? 0)],
   ]
 ]);
 $stmt->close();

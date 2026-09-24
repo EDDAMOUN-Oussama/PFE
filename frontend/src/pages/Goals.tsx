@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useHealth } from '@/contexts/HealthContext';
-import Sidebar from '@/components/Sidebar';
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from '@/components/ui/card';
@@ -43,7 +42,7 @@ const GoalsPageContent = () => {
   };
 
   return (
-    <div className="flex-1 ml-64">
+    <div className="app-content">
       <div className="container p-6">
         <h1 className="text-3xl font-bold mb-6">Objectifs</h1>
 
@@ -155,7 +154,7 @@ const GoalsPage = () => {
   return (
     <HealthProvider>
       <div className="flex min-h-screen bg-background">
-        <Sidebar />
+
         <GoalsPageContent />
       </div>
     </HealthProvider>

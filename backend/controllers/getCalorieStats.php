@@ -7,8 +7,8 @@ $db = Database::connect();
 $userId = $_GET['user_id'] ?? null;
 if (!$userId) exit(json_encode(['success'=>false,'message'=>'ID manquant']));
 
-$query = "SELECT DATE_FORMAT(date, '%W') AS day, ROUND(AVG(calories),0) AS calories
-      FROM FoodEntry
+$query = "SELECT DATE_FORMAT(date, '%W') AS day, SUM(calories) AS calories
+      FROM foodEntry
       WHERE user_id = ? AND date >= CURDATE() - INTERVAL 6 DAY
       GROUP BY date ORDER BY date";
 $stmt = $db->prepare($query);
@@ -18,7 +18,7 @@ $res = $stmt->get_result();
 
 $dayTranslations = [
   'Monday' => 'Lundi',
-  'Tuesday' => 'Mardi', 
+  'Tuesday' => 'Mardi',
   'Wednesday' => 'Mercredi',
   'Thursday' => 'Jeudi',
   'Friday' => 'Vendredi',

@@ -1,69 +1,13 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
-
-require_once '../config/db.php';
-
-$data = json_decode(file_get_contents("php://input"), true);
-
-if (
-  !isset($data['userId'], $data['type'], $data['target'], $data['currentValue'],
-          $data['deadline'], $data['progress'] , $data['title'])
-) {
-  echo json_encode(['success' => false, 'message' => 'Paramètres manquants ', $data]); 
-  exit;
-}
-
-$conn = Database::connect();
-if (!$conn) {
-  echo json_encode(['success' => false, 'message' => 'Échec de la connexion à la base de données']);
-  exit;
-}
-
-$userId = $data['userId'];
-$type = $data['type'];
-$title = $data['title'];
-$target = intval($data['target']);
-$deadline = $data['deadline'];
-$startDate = date('Y-m-d');
-$status = "en cours";
-$currentValue = intval($data['currentValue']);
-$progress = intval($data['progress']);
-if ($currentValue >= $target && $type !== "weight") {
-  $status = "terminé";
-  $progress = 100;
-}
-else if ($currentValue != $target && $type === "weight") {
-  $status = "en cours";
-  $progress = 50; // Pour les objectifs de poids, on ne considère pas que l'objectif est atteint si la valeur actuelle est supérieure à la cible
-}
-
-
-try {
-  $stmt = $conn->prepare("INSERT INTO Goal (type, title, currentValue, target, startDate, endDate, status, progress, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-  $stmt->bind_param("ssiisssii", $type, $title, $currentValue, $target, $startDate, $deadline, $status, $progress, $userId);
-
-  $stmt->execute();
-  $newGoalId = $stmt->insert_id;
-
-  echo json_encode([
-    'success' => true,
-    'id' => $newGoalId,
-    'goal' => [
-      'title' => $title,
-      'id' => $newGoalId,
-      'type' => $type,
-      'target' => $target,
-      'currentValue' => $currentValue,
-      'progress' => $progress,
-      'deadline' => $deadline,
-    ]
-  ]);
-} catch (PDOException $e) {
-  echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-}
-
-$stmt = null;
-$conn = null;
+require_once __DIR__ . '/../helpers/endpoint.php';
+require_once __DIR__ . '/../helpers/tracking.php';
+$d=input(); $id=entry_user_id($d); $type=$d['type'] ?? '';
+if(!in_array($type,['weight','calories','exercise'],true)) throw new ApiError('Type objectif invalide.');
+$title=text_value($d['title'] ?? ''); $target=number_value($d['target'] ?? null,$type==='weight'?20:1,$type==='weight'?300:1000000);
+$current=number_value($d['currentValue'] ?? 0,$type==='weight'?20:0,$type==='weight'?300:1000000);
+$deadline=empty($d['deadline'])?null:date_value($d['deadline']);
+if($deadline && $deadline<date('Y-m-d')) throw new ApiError('Date limite passee.');
+$state=goal_progress($type,$current,$current,$target);
+$stmt=query('INSERT INTO Goal (user_id,type,title,startValue,currentValue,target,startDate,endDate,status,progress) VALUES (?,?,?,?,?,?,?,?,?,?)',[$id,$type,$title,$current,$current,$target,date('Y-m-d'),$deadline,$state['status'],$state['progress']]);
+$goal=rows('SELECT *,endDate AS deadline FROM Goal WHERE id=?',[$stmt->insert_id])[0];
+json_response(['success'=>true,'goal'=>$goal],201);

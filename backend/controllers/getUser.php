@@ -21,21 +21,21 @@ try {
 
     // Préparer la requête SQL avec LEFT JOIN pour récupérer le statut de la demande
     $stmt = $conn->prepare("
-        SELECT 
-            u.id, 
-            u.name, 
-            u.email, 
-            u.height, 
+        SELECT
+            u.id,
+            u.name,
+            u.email,
+            u.height,
             u.gender,
             u.birthdate,
-            u.currentWeight, 
-            u.goalWeight, 
-            u.goalCalories, 
+            u.currentWeight,
+            u.goalWeight,
+            u.goalCalories,
             u.activityLevel,
             u.role,
             sr.status as specialist_request_status
         FROM users u
-        LEFT JOIN specialist_requests sr ON u.id = sr.user_id
+        LEFT JOIN specialist_requests sr ON sr.id = (SELECT MAX(id) FROM specialist_requests WHERE user_id = u.id)
         WHERE u.id = ?
     ");
 
@@ -66,7 +66,7 @@ try {
     // et renvoyer une erreur 500 avec un message JSON clair
     http_response_code(500); // Internal Server Error
     echo json_encode([
-        'success' => false, 
+        'success' => false,
         'message' => 'Internal Server Error: ' . $e->getMessage()
     ]);
 }
