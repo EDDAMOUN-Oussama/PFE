@@ -38,26 +38,24 @@ Enable MySQLi and the PHP extensions required by Composer, including curl, dom, 
 
 ### 1. Place the repository at the expected URL
 
-For a new checkout, run these commands only if `C:\wamp64\www\pfe` does not already contain a project:
+For a new checkout, run these commands only if `C:\wamp64\www\Healthy_track` does not already contain a project:
 
 ```powershell
 cd C:\wamp64\www
-git clone https://github.com/EDDAMOUN-Oussama/PFE.git pfe
-cd pfe
+git clone https://github.com/EDDAMOUN-Oussama/PFE.git Healthy_track
+cd Healthy_track
 ```
 
 The expected layout is:
 
 ```text
-C:\wamp64\www\pfe\
+C:\wamp64\www\Healthy_track\
   README.md
   backend\
   frontend\
 ```
 
-The frontend currently contains absolute API URLs beginning with `http://localhost/pfe/backend/controllers/`. Apache must serve **this checkout's** backend at that address.
-
-If your Git checkout is nested at `C:\wamp64\www\pfe\PFE`, the existing URLs instead reach the outer `pfe\backend`. To work directly from the nested checkout, replace `http://localhost/pfe/backend/` with `http://localhost/pfe/PFE/backend/` throughout `frontend/src`, or configure an Apache alias so `/pfe/backend` points to this checkout's backend. Choose one mapping consistently; otherwise you may test a different backend from the one you edit.
+The frontend currently contains absolute API URLs beginning with `http://localhost/Healthy_track/backend/controllers/`. Apache must serve **this checkout's** backend at that address.
 
 ### 2. Start Apache and MySQL
 
@@ -190,7 +188,7 @@ The frontend calls PHP controller files directly. `backend/routes/api.php` is in
 | Symptom | What to check |
 | --- | --- |
 | `localhost` refuses the connection | Start Apache and MySQL in Wampserver. |
-| Frontend cannot reach PHP or receives HTML instead of JSON | Verify the `/pfe/backend/` mapping, especially with nested project copies; inspect the failing request and PHP error logs. |
+| Frontend cannot reach PHP or receives HTML instead of JSON | Verify the `/Healthy_track/backend/` mapping, especially with nested project copies; inspect the failing request and PHP error logs. |
 | Unknown database or missing table | Import the compatible schema into the MySQL instance configured in `db.php`. |
 | `vendor/autoload.php` or TCPDF is missing | Run `composer install` inside `backend/`. |
 | Composer reports a missing extension or PHP mismatch | Check `php -v`, `php --ini`, and `composer check-platform-reqs`; enable extensions for the CLI PHP installation too. |
