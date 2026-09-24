@@ -39,10 +39,10 @@ const ReportsPageContent = () => {
     if (!user) return;
 
     Promise.all([
-      fetch(`http://localhost/pfe/backend/controllers/getWeightStats.php?user_id=${user.id}`).then(r => r.json()),
-      fetch(`http://localhost/pfe/backend/controllers/getCalorieStats.php?user_id=${user.id}`).then(r => r.json()),
-      fetch(`http://localhost/pfe/backend/controllers/getMacroStats.php?user_id=${user.id}`).then(r => r.json()),
-      fetch(`http://localhost/pfe/backend/controllers/getMonthlySummary.php?user_id=${user.id}`).then(r => r.json())
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getWeightStats.php?user_id=${user.id}`).then(r => r.json()),
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getCalorieStats.php?user_id=${user.id}`).then(r => r.json()),
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getMacroStats.php?user_id=${user.id}`).then(r => r.json()),
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getMonthlySummary.php?user_id=${user.id}`).then(r => r.json())
     ])
     .then(([w, c, m, summary]) => {
       if (w.success) setWeightData(w.data);
@@ -76,7 +76,7 @@ const ReportsPageContent = () => {
       <div className="container p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Rapports et Analyses</h1>
-          <Button variant="outline" className="flex items-center"   onClick={() => {const userId = localStorage.getItem('user_id'); if (userId) {window.open(`http://localhost/pfe/backend/controllers/exportUserReport.php?user_id=${userId}`, '_blank');}}}>
+          <Button variant="outline" className="flex items-center"   onClick={() => {const userId = localStorage.getItem('user_id'); if (userId) {window.open(`http://localhost/pfe/PFE/backend/controllers/exportUserReport.php?user_id=${userId}`, '_blank');}}}>
             <Download className="mr-2 h-4 w-4" />
             Exporter les Données
           </Button>

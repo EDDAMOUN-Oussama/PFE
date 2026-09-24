@@ -215,7 +215,7 @@ export const EditProfileForm = ({ user, open, onOpenChange, refetchUser }) => {
   const updateUserData = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/updateUser.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateUser.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: user.id, ...formData }),

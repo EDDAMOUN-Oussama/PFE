@@ -34,7 +34,7 @@ export default function Login() {
 
   async function onSubmit(data: LoginFormValues) {
     try {
-      const res = await fetch('http://localhost/pfe/backend/controllers/login.php', {
+      const res = await fetch('http://localhost/pfe/PFE/backend/controllers/login.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

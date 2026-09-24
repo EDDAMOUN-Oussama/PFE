@@ -42,7 +42,7 @@ export default function ResetPassword() {
 
   async function onSubmit(data: ResetPasswordFormValues) {
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/resetpass.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/resetpass.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

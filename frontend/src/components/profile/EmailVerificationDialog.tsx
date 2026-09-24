@@ -25,7 +25,7 @@
 
 //   const handleEmailVerification = () => {
 //     try {
-//       const verifyResponse = await fetch('http://localhost/pfe/backend/controllers/verify_code.php', {
+//       const verifyResponse = await fetch('http://localhost/pfe/PFE/backend/controllers/verify_code.php', {
 //         method: 'POST',
 //         headers: {
 //           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ export const EmailVerificationDialog = ({
 
     setIsVerifying(true);
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/verify_code_Modifer.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/verify_code_Modifer.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

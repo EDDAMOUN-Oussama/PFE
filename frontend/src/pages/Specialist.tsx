@@ -17,7 +17,7 @@ const SpecialistPageContent = () => {
         if (!user) return;
         setIsLoadingAppointments(true);
         try {
-            const response = await fetch(`http://localhost/pfe/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
+            const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
             const data = await response.json();
             if (data.success) {
                 setAppointments(data.appointments);
@@ -37,7 +37,7 @@ const SpecialistPageContent = () => {
 
     const handleStatusUpdate = async (appointmentId, newStatus) => {
         try {
-            const response = await fetch('http://localhost/pfe/backend/controllers/updateAppointmentStatus.php', {
+            const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateAppointmentStatus.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ appointment_id: appointmentId, new_status: newStatus }),

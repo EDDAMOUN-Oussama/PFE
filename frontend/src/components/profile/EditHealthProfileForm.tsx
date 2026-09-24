@@ -42,7 +42,7 @@ export const EditHealthProfileForm = ({user, open, onOpenChange, refetchUser }: 
 
   const onSubmit = async (data: HealthProfileFormData) => {
     try {
-      const response = await fetch ('http://localhost/pfe/backend/controllers/updateUserHealth.php', {
+      const response = await fetch ('http://localhost/pfe/PFE/backend/controllers/updateUserHealth.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json' },

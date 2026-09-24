@@ -26,7 +26,7 @@ const DeleteAccountSection = () => {
         setIsDeleting(false);
         return;
       }
-      const res = await fetch('http://localhost/pfe/backend/controllers/deleteMyCompet.php', {
+      const res = await fetch('http://localhost/pfe/PFE/backend/controllers/deleteMyCompet.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, code }),

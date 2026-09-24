@@ -74,7 +74,7 @@ export default function Register() {
         ...data,
         dateOfBirth: format(data.dateOfBirth, "yyyy-MM-dd"),
       };
-      const response = await fetch('http://localhost/pfe/backend/controllers/register.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/register.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ export default function Register() {
     }
     console.log('Renvoyer le code de vérification à:', submittedData.email);
     try {
-      const resendResponse = await fetch('http://localhost/pfe/backend/controllers/resend_code.php', {
+      const resendResponse = await fetch('http://localhost/pfe/PFE/backend/controllers/resend_code.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export default function Register() {
 
   async function verifyCode() {
     try {
-      const verifyResponse = await fetch('http://localhost/pfe/backend/controllers/verify_code.php', {
+      const verifyResponse = await fetch('http://localhost/pfe/PFE/backend/controllers/verify_code.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

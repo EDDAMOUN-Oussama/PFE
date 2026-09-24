@@ -48,7 +48,7 @@ export const ChangePasswordForm = ({ open, onOpenChange }: ChangePasswordFormPro
       return;
     }
     try {
-    const response = await fetch('http://localhost/pfe/backend/controllers/updatePassword.php', {
+    const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updatePassword.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

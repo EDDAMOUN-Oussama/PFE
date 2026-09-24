@@ -16,7 +16,7 @@ const AdminPageContent = () => {
   const fetchRequests = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/getSpecialistRequests.php');
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/getSpecialistRequests.php');
       const data = await response.json();
       if (data.success) {
         setRequests(data.requests);
@@ -36,7 +36,7 @@ const AdminPageContent = () => {
 
   const handleRequestUpdate = async (requestId, newStatus) => {
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/updateSpecialistRequest.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateSpecialistRequest.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ request_id: requestId, new_status: newStatus }),

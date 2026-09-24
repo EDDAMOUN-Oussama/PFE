@@ -47,7 +47,7 @@ interface HealthContextType {
 const HealthContext = createContext<HealthContextType | undefined>(undefined);
 
 export async function fetchExerciseEntries(userId: number): Promise<ExerciseEntry[]> {
-  const res = await fetch(`http://localhost/pfe/backend/controllers/getExerciseEntries.php?user_id=${userId}`);
+  const res = await fetch(`http://localhost/pfe/PFE/backend/controllers/getExerciseEntries.php?user_id=${userId}`);
   if (!res.ok) throw new Error("Erreur lors du chargement des exercices.");
   return await res.json();
 }
@@ -101,9 +101,9 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     const date = new Date().toISOString().split('T')[0];
     try {
       const [foodRes, exerciseRes, weightRes] = await Promise.all([
-        fetch(`http://localhost/pfe/backend/controllers/getFoodEntries.php?user_id=${userId}`),
-        fetch(`http://localhost/pfe/backend/controllers/getExerciseEntries.php?user_id=${userId}`),
-        fetch(`http://localhost/pfe/backend/controllers/getWeightEntries.php?user_id=${userId}`)
+        fetch(`http://localhost/pfe/PFE/backend/controllers/getFoodEntries.php?user_id=${userId}`),
+        fetch(`http://localhost/pfe/PFE/backend/controllers/getExerciseEntries.php?user_id=${userId}`),
+        fetch(`http://localhost/pfe/PFE/backend/controllers/getWeightEntries.php?user_id=${userId}`)
       ]);
   
       const foodData = await foodRes.json();
@@ -144,7 +144,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   
       const stats = calculateDailyStats(foodData.entries, exerciseData.entries, weightData.entries);
   
-      const response = await fetch(`http://localhost/pfe/backend/controllers/updateDailyStats.php`, {
+      const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/updateDailyStats.php`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -180,7 +180,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await fetch(`http://localhost/pfe/backend/controllers/getGoals.php?user_id=${userId}`);
+      const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getGoals.php?user_id=${userId}`);
       const data = await response.json();
       if (data.success) {
         setGoals(data.goals.map((g: any) => ({
@@ -211,7 +211,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const response = await fetch(`http://localhost/pfe/backend/controllers/getUser.php?id=${storedUserId}`);
+      const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getUser.php?id=${storedUserId}`);
       const data = await response.json();
       if (data.success && data.user) {
         setUser(data.user);
@@ -237,7 +237,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     if (!userId) return;
   
     try {
-      const response = await fetch(`http://localhost/pfe/backend/controllers/getDailyStats.php?user_id=${userId}`);
+      const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getDailyStats.php?user_id=${userId}`);
       const result = await response.json();
   
       if (result.success && result.data) {
@@ -253,7 +253,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
 
   const loadFoodEntries = async (userId: string): Promise<FoodEntry[] | null> => {
     try {
-      const res = await fetch(`http://localhost/pfe/backend/controllers/getFoodEntries.php?user_id=${userId}`);
+      const res = await fetch(`http://localhost/pfe/PFE/backend/controllers/getFoodEntries.php?user_id=${userId}`);
       const data = await res.json();
       if (data.success) {
         setFoodEntries(data.entries);
@@ -269,7 +269,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchWeightEntries = async (userId: string) => {
     try {
-      const response = await fetch(`http://localhost/pfe/backend/controllers/getWeightEntries.php?user_id=${userId}`);
+      const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getWeightEntries.php?user_id=${userId}`);
       const result = await response.json();
       if (result.success) {
         const entries: WeightEntry[] = result.entries.map((entry: any) => ({
@@ -303,9 +303,9 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
     loadGoals();
   
     Promise.all([
-      fetch(`http://localhost/pfe/backend/controllers/getFoodEntries.php?user_id=${userId}`).then(res => res.json()),
-      fetch(`http://localhost/pfe/backend/controllers/getExerciseEntries.php?user_id=${userId}`).then(res => res.json()),
-      fetch(`http://localhost/pfe/backend/controllers/getWeightEntries.php?user_id=${userId}`).then(res => res.json())
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getFoodEntries.php?user_id=${userId}`).then(res => res.json()),
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getExerciseEntries.php?user_id=${userId}`).then(res => res.json()),
+      fetch(`http://localhost/pfe/PFE/backend/controllers/getWeightEntries.php?user_id=${userId}`).then(res => res.json())
     ])
       .then(async ([foodData, exerciseData, weightData]) => {
         if (foodData.success) setFoodEntries(foodData.entries);
@@ -352,7 +352,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
       const userId = user?.id;
       if (!userId) return;
   
-      const response = await fetch('http://localhost/pfe/backend/controllers/addGoal.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/addGoal.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...goal }),
@@ -376,7 +376,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
 
   const updateGoal = async (goal: Goal) => {
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/updateGoal.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/updateGoal.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(goal),
@@ -396,7 +396,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   
   const deleteGoal = async (goalId: string) => {
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/deleteGoal.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/deleteGoal.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ goalId }),
@@ -418,7 +418,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   const addWeightEntry = async (weightEntry: { weight: number; date: string }) => {
     try {
       const userId = user?.id;
-      const response = await fetch('http://localhost/pfe/backend/controllers/addWeightEntry.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/addWeightEntry.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...weightEntry }),
@@ -455,7 +455,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   }) => {
     try {
       const userId = user?.id;
-      const response = await fetch('http://localhost/pfe/backend/controllers/addFoodEntry.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/addFoodEntry.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...foodEntry }),
@@ -484,7 +484,7 @@ export function HealthProvider({ children }: { children: React.ReactNode }) {
   const addExerciseEntry = async (exerciseEntry: { name: string; type: string; duration: number; caloriesBurned: number; date: string }) => {
     try {
       const userId = user?.id;
-      const response = await fetch('http://localhost/pfe/backend/controllers/addExerciseEntry.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/addExerciseEntry.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, ...exerciseEntry }),

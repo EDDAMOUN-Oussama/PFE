@@ -27,7 +27,7 @@ const SettingsPageContent = () => {
   if (!user) return;
     setIsSubmittingRequest(true);
     try {
-      const response = await fetch('http://localhost/pfe/backend/controllers/createSpecialistRequest.php', {
+      const response = await fetch('http://localhost/pfe/PFE/backend/controllers/createSpecialistRequest.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id }),

@@ -21,7 +21,7 @@ const NewAppointmentForm = ({ onSubmit, onCancel }) => {
     useEffect(() => {
         const fetchSpecialists = async () => {
             try {
-                const response = await fetch('http://localhost/pfe/backend/controllers/getSpecialists.php');
+                const response = await fetch('http://localhost/pfe/PFE/backend/controllers/getSpecialists.php');
                 const data = await response.json();
                 if (data.success) {
                     setSpecialists(data.specialists);
@@ -90,7 +90,7 @@ const AppointmentsPageContent = () => {
         if (!user) return;
         setIsLoadingAppointments(true);
         try {
-            const response = await fetch(`http://localhost/pfe/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
+            const response = await fetch(`http://localhost/pfe/PFE/backend/controllers/getAppointments.php?user_id=${user.id}&role=${user.role}`);
             const data = await response.json();
             if (data.success) {
                 setAppointments(data.appointments);
@@ -109,7 +109,7 @@ const AppointmentsPageContent = () => {
     const handleNewAppointmentSubmit = async (formData) => {
         if (!user) return;
         try {
-            const response = await fetch('http://localhost/pfe/backend/controllers/createAppointment.php', {
+            const response = await fetch('http://localhost/pfe/PFE/backend/controllers/createAppointment.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ ...formData, patient_id: user.id }),
