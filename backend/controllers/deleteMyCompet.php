@@ -1,15 +1,14 @@
 <?php
+require_once __DIR__ . '/../helpers/bootstrap.php';
 
 
-header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
 header("Content-Type: application/json; charset=UTF-8");
-require_once '../config/db.php';
+require_once __DIR__ . '/../config/db.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 $userId = intval($data['userId'] ?? 0);
-$code = trim($data['code'] ?? '');
+$code = (string)($data['code'] ?? '');
 
 if (!$userId || !$code) {
     echo json_encode(['success' => false, 'message' => 'Paramètres manquants.']);
@@ -62,6 +61,9 @@ $db->commit();
     echo json_encode(['success'=>false,'message'=>'Suppression impossible. Aucune modification conservee.']); exit;
 }
 $db->close();
+$_SESSION = [];
+setcookie(session_name(), '', ['expires' => time() - 3600] + session_cookie_options());
+session_destroy();
 
 echo json_encode([
     'success' => $success,

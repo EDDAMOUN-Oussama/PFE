@@ -1,8 +1,14 @@
 {
+    "name": "healthytrack/api",
+    "description": "HealthyTrack PHP API",
+    "type": "project",
     "require": {
+        "php": ">=8.2 <8.5",
+        "ext-mysqli": "*",
+        "ext-curl": "*",
+        "ext-mbstring": "*",
+        "ext-openssl": "*",
         "phpmailer/phpmailer": "^7.1",
-        "phpoffice/phpspreadsheet": "^1.29",
-        "tecnickcom/tcpdf": "^6.11",
-        "cloudframework-io/tcpdi_cf": "^1.0"
+        "tecnickcom/tcpdf": "^6.11"
     }
 }

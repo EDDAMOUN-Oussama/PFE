@@ -1,0 +1,23 @@
+*
+!composer.json
+!composer.lock
+!config/
+!config/settings.php
+!config/db.php
+!helpers/
+!helpers/**
+!controllers/
+!controllers/**
+!database/
+!database/*.php
+!database/schema.sql
+!public/
+!public/**
+!public/.htaccess
+!docker/
+!docker/**
+# Never include local config, environment files or Render secret files.
+**/.env*
+**/local.php
+**/*.pem
+**/*.key

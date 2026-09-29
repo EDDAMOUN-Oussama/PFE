@@ -1,9 +1,10 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:8080");
+require_once __DIR__ . '/../helpers/bootstrap.php';
+
 header("Content-Type: application/json; charset=UTF-8");
 
 // la configuration de la base de données
-require_once '../config/db.php';
+require_once __DIR__ . '/../config/db.php';
 
 // Vérifier que l'ID de l'utilisateur est bien fourni
 if (!isset($_GET['id'])) {
@@ -67,7 +68,7 @@ try {
     http_response_code(500); // Internal Server Error
     echo json_encode([
         'success' => false,
-        'message' => 'Internal Server Error: ' . $e->getMessage()
+        'message' => 'Erreur serveur.'
     ]);
 }
 ?>

@@ -1,48 +1,14 @@
 <?php
-require_once '../config/db.php';
-
-header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS"); 
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Content-Type: application/json; charset=UTF-8");
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit(); 
-}
-
-$data = json_decode(file_get_contents("php://input"));
-
-if (
-    !empty($data->patient_id) && 
-    !empty($data->specialist_id) && 
-    !empty($data->appointment_date) && 
-    !empty($data->appointment_time) && 
-    !empty($data->type)
-) {
-    try {
-        $db = Database::connect();
-        $query = "INSERT INTO appointments (patient_id, specialist_id, appointment_date, appointment_time, type, reason) VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $db->prepare($query);
-        
-        // S'assurer que 'reason' existe, sinon utiliser une chaîne vide
-        $reason = $data->reason ?? '';
-
-        $stmt->bind_param("iissss", $data->patient_id, $data->specialist_id, $data->appointment_date, $data->appointment_time, $data->type, $reason);
-
-        if ($stmt->execute()) {
-            http_response_code(200);
-            echo json_encode(['success' => true, 'message' => 'Rendez-vous créé avec succès.']);
-        } else {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Erreur lors de la création du rendez-vous.']);
-        }
-    } catch (Exception $e) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Erreur serveur: ' . $e->getMessage()]);
-    }
-} else {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Données incomplètes.']);
-}
-?>
+require_once __DIR__ . '/../helpers/bootstrap.php';
+$d = input();
+$patient = user_id();
+$specialist = (int)($d['specialist_id'] ?? 0);
+$date = date_value($d['appointment_date'] ?? '');
+$time = (string)($d['appointment_time'] ?? '');
+if ($date < date('Y-m-d') || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9](?::00)?$/D', $time)) throw new ApiError('Date ou heure invalide.');
+if (!rows("SELECT id FROM users WHERE id=? AND role='specialist' AND is_verified=1", [$specialist])) throw new ApiError('Specialiste introuvable.', 404);
+$type = text_value($d['type'] ?? '', 50);
+$reason = trim((string)($d['reason'] ?? ''));
+if (mb_strlen($reason) > 2000) throw new ApiError('Motif trop long.');
+$stmt = query('INSERT INTO appointments (patient_id,specialist_id,appointment_date,appointment_time,type,reason) VALUES (?,?,?,?,?,?)', [$patient,$specialist,$date,$time,$type,$reason]);
+json_response(['success' => true, 'id' => $stmt->insert_id, 'message' => 'Rendez-vous cree.'], 201);

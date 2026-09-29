@@ -1,9 +1,9 @@
 <?php
-require_once '../config/db.php';
+require_once __DIR__ . '/../helpers/bootstrap.php';
+require_once __DIR__ . '/../config/db.php';
 
-header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+
 header("Content-Type: application/json; charset=UTF-8");
 
 

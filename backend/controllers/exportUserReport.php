@@ -1,6 +1,7 @@
 <?php
-require_once('../vendor/tecnickcom/tcpdf/tcpdf.php');
-require_once '../config/db.php';
+require_once __DIR__ . '/../helpers/bootstrap.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/db.php';
 
 $userId = intval($_GET['user_id'] ?? 0);
 if (!$userId) {
@@ -123,6 +124,10 @@ $pdf->SetTextColor(0, 210, 255);
 $pdf->SetFont('helvetica', 'I', 13);
 $pdf->Cell(0, 5, "HealthyTrack", 0, 1, 'R');
 
-$pdf->Output("rapport_sante_{$user['name']}.pdf", 'D');
+$document = $pdf->Output('', 'S');
+header('Content-Type: application/pdf');
+header('Content-Disposition: attachment; filename="rapport_sante.pdf"');
+header('Cache-Control: no-store, private');
+echo $document;
 $db->close();
 exit();

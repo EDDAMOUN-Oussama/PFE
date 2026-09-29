@@ -1,9 +1,9 @@
 <?php
-require_once '../config/db.php';
+require_once __DIR__ . '/../helpers/bootstrap.php';
+require_once __DIR__ . '/../config/db.php';
 
-header("Access-Control-Allow-Origin: http://localhost:8080");
-header("Access-Control-Allow-Methods: GET");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+
+
 header("Content-Type: application/json; charset=UTF-8");
 
 try {
@@ -31,6 +31,6 @@ try {
     echo json_encode(['success' => true, 'appointments' => $appointments]);
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Erreur serveur: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Erreur serveur.']);
 }
 ?>

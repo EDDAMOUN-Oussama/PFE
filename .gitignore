@@ -46,3 +46,8 @@ Desktop.ini
 
 
 FIXED.md
+# Hosting/tool state and Python caches
+.vercel/
+__pycache__/
+*.pyc
+/backend/.test-*

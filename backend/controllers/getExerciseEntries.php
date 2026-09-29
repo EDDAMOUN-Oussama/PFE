@@ -1,8 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:8080");
+require_once __DIR__ . '/../helpers/bootstrap.php';
+
 header("Content-Type: application/json; charset=UTF-8");
 
-require_once '../config/db.php';
+require_once __DIR__ . '/../config/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     http_response_code(405);

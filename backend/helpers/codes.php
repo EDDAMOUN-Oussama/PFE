@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/mail.php';
 function rate_limit(string $key, int $limit = 10): void {
+    query('DELETE FROM auth_limits WHERE expires_at < NOW() LIMIT 100');
+    query('DELETE FROM auth_codes WHERE expires_at < NOW() LIMIT 100');
     $key = hash('sha256', $key);
     query('INSERT INTO auth_limits (bucket, attempts, expires_at) VALUES (?, 1, DATE_ADD(NOW(), INTERVAL 15 MINUTE)) ON DUPLICATE KEY UPDATE attempts = IF(expires_at < NOW(), 1, attempts + 1), expires_at = IF(expires_at < NOW(), DATE_ADD(NOW(), INTERVAL 15 MINUTE), expires_at)', [$key]);
     if ((int)rows('SELECT attempts FROM auth_limits WHERE bucket = ?', [$key])[0]['attempts'] > $limit) throw new ApiError('Trop de tentatives. Réessayez dans 15 minutes.', 429);
@@ -10,7 +12,7 @@ function issue_code(int $id, string $purpose, string $email, string $name): void
     $code = (string)random_int(100000, 999999);
     // Call inside the same transaction as any accompanying account update.
     query('INSERT INTO auth_codes (user_id, purpose, email, code_hash, expires_at, attempts) VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 10 MINUTE), 0) ON DUPLICATE KEY UPDATE email = VALUES(email), code_hash = VALUES(code_hash), expires_at = VALUES(expires_at), attempts = 0', [$id, $purpose, $email, password_hash($code, PASSWORD_DEFAULT)]);
-    send_code_email($email, $name, $code);
+    send_code_email($email, $name, $code, $purpose);
 }
 function consume_code(int $id, string $purpose, string $email, string $code, callable $action): void {
     // Failed attempts must be committed; do not throw inside this transaction.
