@@ -7,12 +7,10 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 const CalorieTracker = () => {
-  const { foodEntries, dailyStats, user, fetchDailyStats } = useHealth();
+  const { foodEntries, dailyStats, user } = useHealth();
   const { t } = useI18n();
   const navigate = useNavigate();
   
-  fetchDailyStats();
-
   const goalCalories = user.goalCalories || 2000;
   const remainingCalories = Math.max(0, goalCalories - dailyStats.caloriesConsumed);
   
