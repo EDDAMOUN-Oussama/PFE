@@ -83,7 +83,6 @@ export default function Register() {
         body: JSON.stringify(formattedData),
       });
 
-      console.log('Registration result:', formattedData);
       const result = await response.json();
       if (result.success) {
         toast.success(`Code de vérification envoyé à ${data.email}`, {
@@ -105,7 +104,6 @@ export default function Register() {
       toast.error('Aucun email soumis pour renvoyer le code de vérification.');
       return;
     }
-    console.log('Renvoyer le code de vérification à:', submittedData.email);
     try {
       const resendResponse = await apiFetch('resend_code.php', {
         method: 'POST',

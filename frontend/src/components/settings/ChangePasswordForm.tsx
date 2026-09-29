@@ -42,7 +42,6 @@ export const ChangePasswordForm = ({ open, onOpenChange }: ChangePasswordFormPro
   });
 
   const onSubmit = async (data: ChangePasswordFormData) => {
-    console.log('Changement de mot de passe:', data);
     const userId = localStorage.getItem('user_id');
     if (!userId) {
       toast.error("Utilisateur non trouvé.");

@@ -50,7 +50,6 @@ export default function ResetPassword() {
         },
         body: JSON.stringify(data),
       });
-    console.log('Password reset with:', data);
       const result = await response.json();
 
       if (response.ok) {
@@ -77,6 +76,18 @@ export default function ResetPassword() {
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl><Input type="email" autoComplete="email" {...field} /></FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

@@ -35,11 +35,10 @@ export default function ForgotPassword() {
         },
         body: JSON.stringify(data),
       });
-      console.log('Réinitialisation du mot de passe demandée pour:', data.email);
       const result = await response.json();
 
       if (response.ok) {
-        toast.success(`Code de vérification envoyé à ${data.email}`, {
+        toast.success('Si ce compte existe, vous recevrez un code de verification.', {
               description: "Veuillez vérifier votre email et entrer le code pour vérifier votre compte.",
             });
         setTimeout(() => {
@@ -58,7 +57,7 @@ export default function ForgotPassword() {
   return (
     <AuthLayout
       title="Réinitialiser votre mot de passe"
-      subtitle="Entrez votre email pour recevoir un lien de réinitialisation"
+      subtitle="Entrez votre email pour recevoir un code de réinitialisation"
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
