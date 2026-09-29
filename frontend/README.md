@@ -1,14 +1,14 @@
 # HealthyTrack frontend
 
-The React, TypeScript, and Vite frontend for HealthyTrack.
+React 18, TypeScript, Vite 7 and React Router 7. Use Node.js 22.12+ (22.x).
 
-See the [project README](../README.md) for the complete setup guide, database and email prerequisites, architecture, contributors, and troubleshooting.
-
-From this directory:
-
-```powershell
-npm.cmd ci
-npm.cmd run dev -- --port 8080 --strictPort
+```sh
+npm ci
+npm run dev
 ```
 
-Open http://localhost:8080. Apache and MySQL must also be running, and the backend URL must match your checkout location as described in the project README.
+Open http://localhost:8080. Copy `.env.example` to `.env.local` only when overriding the detected WAMP proxy. The browser calls `/api`; Vite and Vercel forward these requests to the backend.
+
+Vercel: root `frontend`, framework Vite, build `npm run build`, output `dist`. Set `VITE_API_URL` to the Render HTTPS origin before deploying. `vercel.ts` supplies the API proxy and SPA fallback.
+
+Full setup, backend configuration, tests and deployment: [project README](../README.md) and [deployment guide](../DEPLOYMENT.md).

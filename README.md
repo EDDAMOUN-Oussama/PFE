@@ -1,221 +1,243 @@
 # HealthyTrack
 
-HealthyTrack is a final-year project (PFE) for tracking nutrition, exercise, weight, and personal health goals. It combines a French-language React dashboard with a PHP/MySQL backend, and includes appointment booking and specialist-request management.
+HealthyTrack is a final-year project (PFE) for tracking nutrition, exercise, weight and health goals. It has a French React dashboard, a PHP REST API, MySQL storage, account verification and appointment workflows.
 
-## Features
+**Start here:** [local setup](#local-installation) or the step-by-step [deployment guide](DEPLOYMENT.md). Existing installations should also read [FIXES.md](FIXES.md).
 
-| Area | Functionality |
-| --- | --- |
-| Accounts | Registration, email verification, login, password reset, profile editing, and account deletion |
-| Dashboard | Daily calorie intake, calories burned, activity duration, weight, and goal summaries |
-| Nutrition | Food entries with calories, protein, carbohydrates, and fats |
-| Exercise | Activity entries with duration and calories burned |
-| Weight and goals | Weight history, goal creation, editing, and progress displays |
-| Reports | Weight and nutrition charts, monthly summaries, and PDF export |
-| Appointments | Booking requests and specialist appointment-status management |
-| Administration | Review and approve or reject requests to become a specialist |
-| Appearance | Light, dark, and system themes |
+## Main features
 
-The notification page derives events from saved goals. Read, hide, and one-hour snooze actions are stored per account in the current browser. The interface is French; the language setter does not currently switch languages.
+- Registration, email verification, login/logout, password reset and profile/account management.
+- Daily calories, macronutrients, exercise duration, weight history, goals and progress charts.
+- Monthly statistics and downloadable PDF health reports.
+- Appointment requests, specialist appointment management and administrator review of specialist applications.
+- Light/dark/system themes and goal-derived notifications stored per account in the browser.
 
-## Technology
+The interface is French. The language setting does not currently translate the whole application. Notification read/hide/snooze state is local to the browser. There is no file-upload feature or persistent uploaded-media directory.
 
-- **Frontend:** React 18, TypeScript, Vite 5, React Router, Tailwind CSS, shadcn/ui and Radix UI.
-- **Forms and charts:** React Hook Form, Zod, and Recharts.
-- **Backend:** PHP controllers, MySQL through MySQLi, and Composer.
-- **Email and documents:** PHPMailer and TCPDF. The Composer manifest also includes PhpSpreadsheet and TCPDI.
-- **Local environment:** Wampserver on Windows (Apache, PHP, and MySQL).
-
-## Before you start
-
-You need Git, Node.js with npm, Composer, and a PHP/MySQL web-server environment. The locked frontend tooling requires Node.js 18 or newer; use a maintained Node.js release compatible with the lockfile. PHP 8.2 is a suitable local target for the declared backend dependencies; verify your installation with Composer's platform check below.
-
-Enable MySQLi and the PHP extensions required by Composer, including curl, dom, fileinfo, gd, mbstring, xml, xmlreader, xmlwriter, zip, and OpenSSL for email. Composer reports any additional missing requirements.
-
-**Database setup:** a schema-only SQL file is included at `backend/database/schema.sql`. Fresh installations must import it and run `backend/database/migrate.php`. Existing installations must back up their database and run the migration; do not import the schema over existing tables.
-
-**Access-control status:** session login and account verification have been implemented. Applying the shared authentication/ownership guard to the remaining tracking, reporting, appointment, and administrator endpoints is still pending. These endpoints must not be exposed publicly until that integration is completed. Frontend route checks do not replace backend authorization.
-
-## Local setup with Wampserver
-
-### 1. Place the repository at the expected URL
-
-For a new checkout, run these commands only if `C:\wamp64\www\Healthy_track` does not already contain a project:
-
-```powershell
-cd C:\wamp64\www
-git clone https://github.com/EDDAMOUN-Oussama/PFE.git Healthy_track
-cd Healthy_track
-```
-
-The expected layout is:
+## Architecture
 
 ```text
-C:\wamp64\www\Healthy_track\
-  README.md
-  backend\
-  frontend\
+Browser
+   | HTTPS, host-only session cookie
+   v
+Vercel: React + Vite
+   | /api/* reverse proxy (HTTPS)
+   v
+Render: Docker / Apache / PHP
+   | verified TLS                 | HTTPS
+   v                              v
+Aiven MySQL                     Brevo email API
 ```
 
-The frontend calls a single `/api` base URL. Vite proxies those calls to Apache and detects this checkout's directory under WAMP's `www` directory, including a nested `pfe/PFE` checkout.
+The browser always calls `/api`. `VITE_API_URL` configures the upstream in Vercel and optionally Vite. This preserves PHP sessions on unrelated `vercel.app` and `onrender.com` domains without requiring third-party cookies. No JWT conversion is involved.
 
-For a different server layout, copy `frontend/.env.example` to `frontend/.env.local` and set `BACKEND_ORIGIN` and `BACKEND_PATH`. For production, configure a same-origin `/api` reverse proxy, or set `VITE_API_BASE_URL` and the backend `APP_ORIGIN` explicitly. Restart Vite after changing environment settings.
+The backend exposes existing `/<controller>.php` endpoints and `GET /health`. The Docker document root is `backend/public`; configuration, vendor libraries and SQL are outside the public directory. All private controllers use session, CSRF, ownership and role checks.
 
-### 2. Start Apache and MySQL
+## Technologies and requirements
 
-Open Wampserver and select **Start All Services** from its tray menu. Confirm that Apache and MySQL are running, then open `http://localhost/phpmyadmin`.
-
-Use the MySQL instance that contains your project database. A separate MariaDB instance may have different databases and connection settings.
-
-### 3. Import and configure the database
-
-For a fresh installation, create `HealthyTrackdb` with the `utf8mb4` character set and import [`backend/database/schema.sql`](backend/database/schema.sql) in phpMyAdmin. This file contains table definitions only, with no user accounts or personal data.
-
-For an existing database, retain the tables and records. Make a backup first, then run the migration after installing Composer dependencies:
-
-```powershell
-cd backend
-php database/migrate.php
-```
-
-The migration adds verification-code and rate-limit tables, converts workflow tables to InnoDB for transactions, preserves decimal weights, and adds a starting baseline to goals. Existing goals use their current value at migration time as that baseline; review ongoing weight goals if their original starting weights differ. It does not delete application records. The migration is CLI-only and can be run again.
-
-Copy `backend/config/local.example.php` to `backend/config/local.php` and set your local database settings. The local file is ignored by Git; environment variables override it. Defaults remain host `localhost`, database `HealthyTrackdb`, user `root`, and an empty password. PHP does not automatically read `.env` files.
-
-### 4. Install backend dependencies
-
-From the repository root:
-
-```powershell
-cd backend
-php -v
-composer install
-composer check-platform-reqs
-cd ..
-```
-
-Make sure Composer uses the intended PHP executable. Changing the PHP version in Wampserver does not necessarily change the `php` executable on your terminal's `PATH`. Do not bypass missing extension requirements with `--ignore-platform-reqs`.
-
-### 5. Configure email verification
-
-Registration, verification-code resending, password recovery, and email changes share [`backend/helpers/mail.php`](backend/helpers/mail.php). Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_ENCRYPTION`, `SMTP_USER`, `SMTP_PASSWORD`, and `SMTP_FROM` in the ignored `backend/config/local.php`, or provide them as environment variables.
-
-Credentials formerly embedded in the controllers have been removed from the working tree. Replace those credentials at the email provider; their presence in older Git history is not undone by this change. Use newly issued credentials in private configuration. Email delivery has not been tested with a real mailbox.
-
-Codes expire after ten minutes, allow at most five attempts, and are bound to their purpose and destination address. Successfully used codes cannot be reused. Accounts must verify their email before login; there are no seeded real accounts or default administrator credentials.
-
-### 6. Install and start the frontend
-
-From the repository root:
-
-```powershell
-cd frontend
-npm.cmd ci
-npm.cmd run dev -- --port 8080 --strictPort
-```
-
-Open **http://localhost:8080** and keep the terminal running. On shells other than Windows PowerShell, use `npm` instead of `npm.cmd`.
-
-Use `localhost:8080` with the development proxy. Backend `APP_ORIGIN` controls direct cross-origin requests. If port 8080 is occupied, stop the conflicting development server or update the CORS configuration consistently before choosing a different origin.
-
-Apache serves the PHP backend; the Vite server serves the React frontend. Both must remain running. Vite alone does not run PHP.
-
-## First-use walkthrough
-
-1. Register with an email address that can receive the verification code.
-2. Verify the account and log in.
-3. Complete your health profile, including weight, height, and goals.
-4. Add a food entry, an exercise entry, and a weight measurement.
-5. Review the dashboard and create a personal goal.
-6. Open Reports to view available data and export a PDF.
-7. Use Appointments to request a consultation. Specialist and administrator workflows require the corresponding database roles; they are not assigned by ordinary registration.
-
-## Development commands
-
-Run the following from `frontend/`:
-
-| Command | Purpose |
+| Component | Version / purpose |
 | --- | --- |
-| `npm.cmd run dev -- --port 8080 --strictPort` | Start local development at the expected origin |
-| `npm.cmd run build` | Generate production frontend files in `dist/` |
-| `npm.cmd run build:dev` | Build with Vite's development mode |
-| `npm.cmd run lint` | Run ESLint |
-| `npm.cmd run preview -- --port 8080 --strictPort` | Preview an existing build at the expected origin |
+| Node.js | 22.12+ within the 22.x release line; `.nvmrc` selects 22 |
+| Frontend | React 18, TypeScript, Vite 7, React Router 7, Tailwind, Radix/shadcn UI, Recharts |
+| PHP | 8.2-8.4; Docker uses PHP 8.3 with Apache |
+| Database | MySQL 8, MySQLi prepared statements, utf8mb4, InnoDB |
+| Composer | 2; locked PHPMailer and TCPDF dependencies |
+| Local server | Wampserver or PHP's development server; Docker is optional locally |
 
-Run `npm.cmd test` in `frontend/` for statistics/date regression tests. From the repository root, run `py -3.11 backend/tests/security.py` for the isolated PHP/MySQL integration suite (Python 3 and PHP on PATH are required). The suite creates a uniquely named `healthytrack_test_*` database using local MySQL root access, inserts only synthetic accounts, and drops that database afterwards. It never uses application records. Ports 8099 and 8199 must be free; frontend dependencies must be installed for the proxy checks.
+PHP needs MySQLi/mysqlnd, curl, mbstring and OpenSSL, plus the normal core extensions. Docker also includes PDO MySQL, GD, ZIP and OPcache. `composer check-platform-reqs` checks your installation. Unused spreadsheet/PDF-import libraries were removed; PDF generation remains available through TCPDF.
 
-The integration suite tests the pending authorization helper separately from the endpoints where it has not yet been installed. Passing those helper tests is not evidence that every endpoint is already protected. A frontend build also does not verify real SMTP delivery or visual browser behavior.
-
-## Project structure
+## Repository structure
 
 ```text
 backend/
-  config/db.php          MySQL connection
-  config/local.example.php  Private configuration template
-  database/              Schema-only SQL and migration CLI
-  tests/                 Isolated integration checks
-  controllers/          Account, tracking, appointment, and report endpoints
-  helpers/              JSON response helper
-  routes/api.php        Retired router (HTTP 410)
-  composer.json         PHP dependency definitions
-  composer.lock         Locked PHP dependency versions
+  config/          Environment settings, database connection, private local.php
+  controllers/     Account, tracking, reporting and appointment endpoints
+  helpers/         HTTP/CORS, authentication, mail, codes and tracking logic
+  public/          Docker/public-server entry point and /health
+  database/        Clean schema, legacy migration and read-only connection check
+  docker/          Apache/PHP settings and Render PORT startup script
+  tests/           Isolated regression tests
+  Dockerfile
+  .env.example
 frontend/
-  public/               Static images and browser assets
-  src/
-    components/         Feature components and shared UI primitives
-    contexts/           Shared health state, French translations, and themes
-    lib/api.ts          Session-aware API client
-    lib/health.ts       Pure date/statistics calculations
-    hooks/              Shared React hooks
-    pages/              Application screens
-    types/              Health-related TypeScript definitions
-    App.tsx             Client-side routes
-    main.tsx            React entry point
-  package.json          Frontend dependencies and scripts
-  package-lock.json     npm dependency lockfile
-  vite.config.ts        Development server and import aliases
+  src/             Pages, components, contexts, types and shared API client
+  tests/           Node regression tests
+  .env.example
+  vercel.ts        Environment-driven API proxy and SPA routing
+  vite.config.ts   Local development/preview proxy
+DEPLOYMENT.md
+FIXES.md
 ```
 
-The frontend calls PHP controller files directly. `backend/routes/api.php` is retired and returns HTTP 410. The frontend uses the controller endpoints through the API client.
+## Local installation
+
+Run commands from the actual Git checkout, currently `C:/wamp64/www/pfe/PFE`, not its parent directory. Keep existing `backend/config/local.php`; do not overwrite it with the example.
+
+### 1. Backend configuration
+
+Start Apache and MySQL in Wampserver. Select PHP 8.2 or newer for both Apache and your terminal. Check `php -v`: this machine originally had PHP 7.4 first on PATH.
+
+```powershell
+cd C:/wamp64/www/pfe/PFE/backend
+composer install
+composer check-platform-reqs
+# Only if local.php does not already exist:
+Copy-Item config/local.example.php config/local.php
+```
+
+Edit the ignored `config/local.php` with your local database credentials, frontend origin and mail settings. Environment variables override this file. Existing `SMTP_*` and `APP_ORIGIN` settings are accepted for WAMP compatibility; new installations should use `MAIL_*` and `FRONTEND_URL`.
+
+PHP does **not** automatically load `.env` files. `backend/.env.example` is a template for Render environment settings or Docker's `--env-file`. WAMP uses `config/local.php` or process environment variables.
+
+### 2. Database initialization
+
+For a **new, empty database**, create `HealthyTrackdb` with utf8mb4 in phpMyAdmin and import [`backend/database/schema.sql`](backend/database/schema.sql). It contains the complete current schema, including verification codes/rate limits, decimal measurements and goal baselines. There are no accounts, password hashes, seeds or private data.
+
+For an **existing installation**, back up the database and run this from `backend/`:
+
+```powershell
+php database/migrate.php
+```
+
+Do not import the fresh schema over an existing database. The legacy migration preserves records, converts workflow tables to InnoDB and adds missing columns/tables. Existing goals use their current value as their initial baseline. Review ongoing weight goals if you know a different original baseline.
+
+Then run the read-only check:
+
+```powershell
+php database/check.php
+```
+
+### 3. Frontend development
+
+```powershell
+cd C:/wamp64/www/pfe/PFE/frontend
+npm install
+npm run dev
+```
+
+Open `http://localhost:8080`. Vite detects the checkout's path below WAMP's `www`, including the nested `pfe/PFE` directory. API calls go through `/api` to the PHP controllers.
+
+For another layout, copy `frontend/.env.example` to the ignored `frontend/.env.local` and set `BACKEND_ORIGIN` / `BACKEND_PATH`. Restart Vite after changes. `npm ci` is preferred for reproducing the committed lockfile.
+
+### 4. Optional PHP development server
+
+From `backend/`:
+
+```powershell
+php -S 127.0.0.1:8000 -t public public/index.php
+```
+
+In `frontend/.env.local`, set `VITE_API_URL=http://127.0.0.1:8000`, retain `FRONTEND_URL=http://localhost:8080` on PHP, and restart Vite. This exercises the same public router used by Docker. PHP's built-in server is only for local development.
+
+### 5. Optional local Docker
+
+```powershell
+docker build -t healthytrack-api ./backend
+# Create an ignored backend/.env from the example and set your local values first.
+docker run --rm -p 8000:10000 --env-file backend/.env healthytrack-api
+```
+
+For HTTP-only local Docker use `APP_ENV=development`, `FRONTEND_URL=http://localhost:8080`, `SESSION_SAMESITE=Lax`, and `DB_HOST=host.docker.internal` for MySQL on the Windows host. Production always requires HTTPS cookies and a verified database CA. If using Aiven locally, mount its CA read-only and set `DB_SSL_CA` to the container path.
+
+## Environment variables
+
+| Variable | Where / meaning |
+| --- | --- |
+| `VITE_API_URL` | Vercel: real Render HTTPS origin, without a path. Vite: optional backend override. Never a secret. |
+| `BACKEND_ORIGIN`, `BACKEND_PATH` | Optional local WAMP proxy overrides only |
+| `APP_ENV` | Backend; `production` in Docker/Render, `development` locally |
+| `FRONTEND_URL` | Exact allowed frontend origin and base for reset-page links; no path or wildcard |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` | Backend database connection; use the port Aiven supplies |
+| `DB_SSL_CA` | Absolute path to Aiven's downloaded CA; required in production |
+| `APP_TIMEZONE` | Optional, defaults to `Africa/Casablanca`; aligns PHP/MySQL dates |
+| `SESSION_SAMESITE` | Optional, defaults to `Lax` for the recommended proxy |
+| `SESSION_SECURE` | Local override; production always forces secure cookies |
+| `MAIL_TRANSPORT` | `brevo` (recommended on Render) or `smtp` |
+| `BREVO_API_KEY` | Backend only; required with Brevo HTTPS |
+| `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Verified sender; name defaults to `HealthyTrack` |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_ENCRYPTION` | SMTP only; Brevo relay / 2525 / `tls` is an alternative |
+| `MAIL_USERNAME`, `MAIL_PASSWORD` | SMTP only; provider-issued credentials |
+| `PORT` | Render supplies this; Docker defaults to 10000 |
+
+Keep secrets in Render settings, a Render secret file, ignored local PHP configuration, or ignored Docker environment files. Never put database credentials or mail keys in a `VITE_*` variable: frontend build variables can be public.
+
+## Production deployment
+
+Follow [DEPLOYMENT.md](DEPLOYMENT.md) for the exact sequence, certificate upload, database import, hosting fields, environment values and final checks.
+
+| Service | Settings |
+| --- | --- |
+| Aiven | Free MySQL service; import the clean schema with verified TLS |
+| Render | Web Service, Docker, branch `main`, root `backend`, Dockerfile `./Dockerfile`, context `.`, health `/health` |
+| Vercel | Root `frontend`, Vite, Node 22.x, `npm ci`, `npm run build`, output `dist` |
+| Email | Brevo HTTPS API with a verified sender; optional PHPMailer SMTP |
+
+`frontend/vercel.ts` is the supported programmatic equivalent of `vercel.json`: it reads `VITE_API_URL`, proxies `/api/*` and sends frontend routes to `index.html`. Do not add a second Vercel configuration file. [Vercel configuration reference](https://vercel.com/docs/project-configuration/vercel-ts)
+
+Free hosting is suitable for a student demonstration, with limits: Render sleeps after inactivity and can restart; its ephemeral PHP session files disappear, requiring login again. It is not an always-on production service. Aiven's free plan also has resource limits and no SLA. [Render free services](https://render.com/docs/free), [Aiven free MySQL](https://aiven.io/docs/products/mysql/concepts/mysql-free-tier)
+
+## Email and password reset
+
+Render's free service blocks the usual SMTP ports. Set `MAIL_TRANSPORT=brevo` to use `https://api.brevo.com/v3/smtp/email` over HTTPS instead; TLS verification remains enabled. PHPMailer SMTP remains available for WAMP and compatible providers. [Brevo transactional email API](https://developers.brevo.com/docs/send-a-transactional-email)
+
+The existing six-digit code flow is retained: codes are cryptographically random, hashed, purpose-bound, valid for 10 minutes and single-use, with at most five verification attempts. Passwords use bcrypt. Reset emails link to `${FRONTEND_URL}/reset-password`; the user enters their email and code there. No password or code is placed in the URL. Reset/resend responses do not reveal whether an account exists, including when delivery fails.
+
+## Security notes
+
+- Every private API endpoint checks the session. User identity, goal ownership, appointment ownership and administrator/specialist roles are checked on the server.
+- Mutations require a session-bound CSRF token. CORS allows the exact configured origin; API and PDF responses are not cached.
+- Production sessions use host-only `HttpOnly; Secure; SameSite=Lax` cookies through Vercel. Sessions expire after two hours of inactivity and after a Render restart. Changed passwords invalidate other sessions.
+- Aiven connections require its CA and certificate verification. There is no insecure TLS bypass or production fallback to local root credentials.
+- Local settings, environment files, keys, dependencies and builds are ignored by Git. Docker copies only selected source directories and excludes credentials.
+- Historical commits contain old SMTP credentials. **Revoke/rotate them at the provider before deployment.** Removing them from current files does not remove their history. No history rewrite was performed.
+- Use backups and dedicated test accounts.
+
+To bootstrap an administrator, register and verify your own account, then use your private database console to change only that account's role to `admin`. There is no default administrator password or public promotion endpoint.
+
+## Testing
+
+```powershell
+cd frontend
+npm ci
+npm test
+npm run lint
+npm run build
+npm audit
+cd ../backend
+composer install
+composer validate
+composer check-platform-reqs
+composer audit
+php tests/config.php
+php -n tests/mail.php
+```
+
+From the repository root, with a running **local development MySQL** instance and Python 3.11:
+
+```powershell
+$env:PHP_BIN = 'C:/wamp64/bin/php/php8.2.0/php.exe'
+py -3.11 backend/tests/security.py
+```
+
+The integration script creates and drops only its uniquely named `healthytrack_test_<timestamp>` database, using the local test server's root account with an empty password. It cannot be pointed at the application database by `DB_NAME`; it chooses its own test name. Do not run it against a production MySQL server. It starts temporary PHP/Vite servers on ports 8099/8199 and disables real mail credentials. Mail transport tests mock HTTPS; they do not send email.
+
+The production database check is read-only; `/health` checks the API process, not database connectivity. Docker/cloud/TLS/mail delivery checks require the environment described in the deployment guide. See [FIXES.md](FIXES.md) for the latest actual results and limitations.
 
 ## Troubleshooting
 
-| Symptom | What to check |
+| Symptom | Check |
 | --- | --- |
-| `localhost` refuses the connection | Start Apache and MySQL in Wampserver. |
-| Frontend cannot reach PHP or receives HTML instead of JSON | Verify the `/Healthy_track/backend/` mapping, especially with nested project copies; inspect the failing request and PHP error logs. |
-| Unknown database or missing table | Import the compatible schema into the MySQL instance configured in `db.php`. |
-| `vendor/autoload.php` or TCPDF is missing | Run `composer install` inside `backend/`. |
-| Composer reports a missing extension or PHP mismatch | Check `php -v`, `php --ini`, and `composer check-platform-reqs`; enable extensions for the CLI PHP installation too. |
-| PowerShell blocks `npm.ps1` | Use `npm.cmd`, as in the commands above. |
-| Browser reports CORS errors | Use `http://localhost:8080` and confirm the endpoint allows that origin. |
-| Verification email never arrives | Check SMTP configuration, sender permissions, spam folders, and the endpoint's email error. |
-| Login says the account is unverified | Complete email verification before signing in. |
-| Session requests fail after updating | Run `php database/migrate.php` in `backend/`, then sign in again. |
-| A goal baseline differs from its original starting weight | Existing goals are baselined from their current value during migration. Review or recreate an ongoing goal with its intended starting value. |
-
-## Current limitations and deployment
-
-The remaining backend authorization integration is the primary outstanding security requirement. The prepared helper is `backend/helpers/bootstrap.php`; it is active on session/login and account-verification endpoints but not on the remaining legacy/data endpoints. Complete ownership and role enforcement there before deployment.
-
-Statistics are recalculated from persisted entries, and multi-step tracking writes use transactions. Weight goals use a starting baseline and support loss or gain. Calorie and exercise goals accumulate over their selected period; they are not automatic daily or weekly reset schedules.
-
-Notifications are generated from goals and stored locally for this browser. They do not send email, push notifications, or background alarms. TypeScript's legacy project settings remain permissive, and some shared UI/context modules still produce development-only Fast Refresh lint warnings.
-
-Deployment requires Apache/PHP, MySQL, private configuration, the migration, and an SPA fallback for React Router. Configure the API proxy/base URL and allowed origin for your host. Uploading `frontend/dist` alone does not deploy the backend. Browser layout and real email delivery require verification in the target environment.
+| Dashboard flashes after login | Keep the CalorieTracker fix: never fetch full health state during render. |
+| HTML returned instead of JSON | Check `/health`, the Vite proxy path or Vercel `VITE_API_URL`. A free Render instance may still be waking. |
+| Login immediately disappears | Use the Vercel `/api` proxy; check cookie attributes and exact `FRONTEND_URL`. Clear old cookies once. |
+| 403 origin error | Frontend origin must match exactly (scheme, hostname and port); preview domains are not automatically trusted. |
+| Database error | Check Aiven hostname/port, `DB_SSL_CA`, certificate permissions and the imported schema. Run `database/check.php`. |
+| SQL tables missing on Linux | Import the provided schema; table-name capitalization matters. |
+| Reset email never arrives | Check verified sender, provider limits and Brevo logs; public reset responses deliberately stay generic. |
+| PHP dependency error | Ensure terminal and Apache use supported PHP; run Composer's platform check. |
+| Locked npm files on Windows | Stop the project's dev server before installing dependency updates, then retry `npm install`. |
+| First request is slow | Wait for Render to wake and retry; health data is kept in MySQL, not the container filesystem. |
 
 ## Contributors
 
-The repository's Git history credits the following contributors. Multiple author aliases have been grouped under the same person where identifiable:
-
-- **Oussama Eddamoun** — [EDDAMOUN-Oussama](https://github.com/EDDAMOUN-Oussama) (also recorded as OussamaPC and Oussama Eddamoun).
-- **Zakariae Assabiri** — [Zakariae-Assabiri](https://github.com/Zakariae-Assabiri).
-- **Omar** — [OmarKADDOUR10](https://github.com/OmarKADDOUR10).
-
-Specific responsibilities are not documented in the repository, so no role assignments are inferred. The frontend originated from a Lovable scaffold and uses the open-source libraries listed in its package manifest.
-
-## Contributing and license
-
-Describe changes and reproduction steps clearly, run relevant build/lint checks, and keep dependencies, build outputs, credentials, and personal database exports out of commits. Commit dependency manifests and lockfiles so installations are reproducible.
-
-No project-level license file is currently included. Contact the maintainers about reuse or redistribution; third-party dependencies retain their own licenses.
+Git history credits Oussama Eddamoun ([EDDAMOUN-Oussama](https://github.com/EDDAMOUN-Oussama), also `OussamaPC`), [Zakariae-Assabiri](https://github.com/Zakariae-Assabiri), and [OmarKADDOUR10](https://github.com/OmarKADDOUR10). See `git shortlog -sn --all` for the recorded contributions. No project license has been declared.
